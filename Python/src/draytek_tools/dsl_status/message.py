@@ -49,7 +49,7 @@ class Message:
             str: The bytes truncated up to the first null byte.
         """
 
-        # Unlike Python, C uses null terminated strings, truncate them.
+        # Unlike Python, C uses null-terminated strings, truncate them.
         return string_bytes.split(b'\0', 1)[0]
 
     @staticmethod
@@ -58,13 +58,13 @@ class Message:
         Convert DSL Status bytes to a tuple.
 
         This static method takes DSL Status bytes, converts the data types and
-        separates the fields into a tuple.
+        separates the attributes into a tuple.
 
         Args:
             payload (bytes): A DSL Status message in bytes.
 
         Returns:
-            tuple: A tuple of each of the fields.
+            tuple: A tuple of each of the attributes.
         """
 
         # We use struct to unpack the payload data.
@@ -79,14 +79,14 @@ class Message:
                 The bytes of a DSL Status message to optionally initalise this instance with.
                 Defaults to None.
             truncate_strings (bool, optional):
-                Whether to truncate any excess data in the null terminated strings.
+                Whether to truncate any excess data in the null-terminated strings.
                 Defaults to True.
 
         Raises:
             ValueError: If the payload type is not a supported type.
         """
 
-        # Is an empty DSL Status instance being requested?
+        # Is an empty DSL Status Message instance being requested?
         if payload is None:
             # Set blank initial values.
             self.vdsl_upload_speed = 0
@@ -111,7 +111,7 @@ class Message:
             # We use struct to unpack the payload data bytes.
             converted_tuple = self.convert_bytes_to_tuple(payload)
 
-            # Set the fields from the unpacked tuple.
+            # Set the attributes from the unpacked tuple.
             self.set_from_tuple(converted_tuple, truncate_strings)
         # Unsupported type supplied.
         else:
@@ -122,7 +122,7 @@ class Message:
         Converts this instance to a packed series of bytes.
 
         Returns:
-            bytes: The packed bytes representing this DSLStatus instance.
+            bytes: The packed bytes representing this DSL Status Message instance.
         """
         return struct.pack(
             Message.FORMAT_STRING,
@@ -147,71 +147,79 @@ class Message:
 
     def set_from_tuple(self, tuple_data, truncate_arrays = True):
         """
-        Sets the fields in this instance to the supplied tuple data.
+        Sets the attributes in this Message instance to the supplied tuple data.
 
         Args:
-            tuple_data (tuple): The data to set this instance's fields to.
+            tuple_data (tuple): The data to set this Message instance's attributes to.
 
             truncate_strings (bool, optional):
-                Whether to truncate any excess data in the null terminated strings.
+                Whether to truncate any excess data in the null-terminated strings.
                 Defaults to True.
 
         Returns:
             None
         """
 
-        # Set fields from the tuple.
-        self.vdsl_upload_speed = tuple_data[0]
-        self.vdsl_download_speed = tuple_data[1]
-        self.adsl_tx_cells = tuple_data[2]
-        self.adsl_rx_cells = tuple_data[3]
-        self.adsl_tx_crc_errors = tuple_data[4]
-        self.adsl_rx_crc_errors = tuple_data[5]
-        self.dsl_type = tuple_data[6]
-        self.timestamp = tuple_data[7]
-        self.vdsl_snr_upload = tuple_data[8]
-        self.vdsl_snr_download = tuple_data[9]
-        self.adsl_loop_att = tuple_data[10]
-        self.adsl_snr_margin = tuple_data[11]
+        # Define the attributes in the order they appear in the tuple.
+        attributes = [
+            'vdsl_upload_speed',
+            'vdsl_download_speed',
+            'adsl_tx_cells',
+            'adsl_rx_cells',
+            'adsl_tx_crc_errors',
+            'adsl_rx_crc_errors',
+            'dsl_type',
+            'timestamp',
+            'vdsl_snr_upload',
+            'vdsl_snr_download',
+            'adsl_loop_att',
+            'adsl_snr_margin',
+            'modem_firmware_version',
+            'vdsl_profile',
+            'padding',
+            'state',
+            'padding2'
+        ]
 
-        if truncate_arrays:
-            self.modem_firmware_version = self._truncate_string(tuple_data[12])
-            self.vdsl_profile = self._truncate_string(tuple_data[13])
-            self.padding = tuple_data[14]
-            self.state = self._truncate_string(tuple_data[15])
-        else:
-            self.modem_firmware_version = tuple_data[12]
-            self.vdsl_profile = tuple_data[13]
-            self.padding = tuple_data[14]
-            self.state = tuple_data[15]
+        # Some tuple fields are null-terminated strings and may need to be handled separately.
+        string_fields = {'modem_firmware_version', 'vdsl_profile', 'state'}
 
-        self.padding2 = tuple_data[16]
+        # Set the Message attributes from the tuple fields.
+        for index, attribute in enumerate(attributes):
+            # Some attributes need to be handled differently if string truncation is requested.
+            if truncate_arrays and attribute in string_fields:
+                value = self._truncate_string(tuple_data[index])
+            else:
+                value = tuple_data[index]
+
+            # Set the attribute.
+            setattr(self, attribute, value)
 
     def __str__(self):
         """
-        Converts this instance to a string representation of its contents.
+        Converts this Message instance to a string representation of its contents.
 
         Returns:
-            string: A string representing this DSLStatus instance.
+            string: A string representing this DSL Status Message instance.
         """
-        result = (f' VDSL Upload Speed: {self.vdsl_upload_speed} bps'
-                  f' ({self.vdsl_upload_speed // 1000000} Mbps)\n')
-        result += (f' VDSL Download Speed: {self.vdsl_download_speed} bps'
-                   f' ({self.vdsl_download_speed // 1000000} Mbps)\n')
-        result += f' ADSL TX Cells: {self.adsl_tx_cells}\n'
-        result += f' ADSL RX Cells: {self.adsl_rx_cells}\n'
-        result += f' ADSL TX CRC Errors: {self.adsl_tx_crc_errors}\n'
-        result += f' ADSL RX CRC Errors: {self.adsl_rx_crc_errors}\n'
-        result += f' xDSL Type: {self.dsl_type} (6 = VDSL, 1 = ADSL)\n'
-        result += f' Timestamp: {self.timestamp}\n'
-        result += f' VDSL SNR Upload: {self.vdsl_snr_upload}\n'
-        result += f' VDSL SNR Download: {self.vdsl_snr_download}\n'
-        result += f' ADSL Loop Attenuation: {self.adsl_loop_att}\n'
-        result += f' ADSL SNR Margin: {self.adsl_snr_margin}\n'
-        result += f' Modem Firmware Version: {bytes(self.modem_firmware_version)}\n'
-        result += f' VDSL Profile: {bytes(self.vdsl_profile)}\n'
-        result += f' Padding: {bytes(self.padding)}\n'
-        result += f' State: {bytes(self.state)}\n'
-        result += f' Padding2: {bytes(self.padding2)}\n'
-
-        return result
+        return (
+            f' VDSL Upload Speed: {self.vdsl_upload_speed} bps'
+            f' ({self.vdsl_upload_speed // 1000000} Mbps)\n'
+            f' VDSL Download Speed: {self.vdsl_download_speed} bps'
+            f' ({self.vdsl_download_speed // 1000000} Mbps)\n'
+            f' ADSL TX Cells: {self.adsl_tx_cells}\n'
+            f' ADSL RX Cells: {self.adsl_rx_cells}\n'
+            f' ADSL TX CRC Errors: {self.adsl_tx_crc_errors}\n'
+            f' ADSL RX CRC Errors: {self.adsl_rx_crc_errors}\n'
+            f' xDSL Type: {self.dsl_type} (6 = VDSL, 1 = ADSL)\n'
+            f' Timestamp: {self.timestamp}\n'
+            f' VDSL SNR Upload: {self.vdsl_snr_upload}\n'
+            f' VDSL SNR Download: {self.vdsl_snr_download}\n'
+            f' ADSL Loop Attenuation: {self.adsl_loop_att}\n'
+            f' ADSL SNR Margin: {self.adsl_snr_margin}\n'
+            f' Modem Firmware Version: {bytes(self.modem_firmware_version)}\n'
+            f' VDSL Profile: {bytes(self.vdsl_profile)}\n'
+            f' Padding: {bytes(self.padding)}\n'
+            f' State: {bytes(self.state)}\n'
+            f' Padding2: {bytes(self.padding2)}\n'
+        )

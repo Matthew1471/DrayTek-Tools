@@ -27,23 +27,23 @@ The functions in this module allow you to:
 # We provide some data in hex format for ease of data entry.
 import binascii
 
-# We generate and show a SHA1 hash.
+# We generate and show a SHA-1 hash.
 import hashlib
 
-# All the shared DrayTek® DSL Status functions are in this package.
+# All the shared DrayTek® DSL Status message functions are in this package.
 from draytek_tools import dsl_status
 
 def show_decrypt_example():
     """
-    Show an encrypted DSL Status payload being decrypted.
+    Show an encrypted DSL Status message payload being decrypted.
 
     Returns:
         None
     """
 
-    print('----------------------------------------------------')
-    print('Example 1 : Decrypting and parsing DSL Status bytes.')
-    print('----------------------------------------------------\n')
+    print('-----------------------------------------------------------')
+    print('Example 1 : Decrypting and parsing DSL Status message bytes')
+    print('-----------------------------------------------------------\n')
 
     # Test sample data.
     mac_address = binascii.unhexlify('aabbccddeeff')
@@ -58,30 +58,30 @@ def show_decrypt_example():
     print('MAC Address (Hex):\n\n ' + str(binascii.hexlify(mac_address)) + '\n')
     print(' ->\n')
     mac_address_digest = binascii.hexlify(hashlib.sha1(mac_address).digest())
-    print('MAC Address SHA1 (Hex):\n\n ' + str(mac_address_digest) + '\n')
+    print('MAC Address SHA-1 (Hex):\n\n ' + str(mac_address_digest) + '\n')
     print(' ->\n')
     print('Decryption Key (Bytes):\n\n ' + str(dsl_status.cryptography.get_key(mac_address)) + '\n')
 
     # Show the raw encrypted payload bytes.
     print(' +\n')
-    print('Encrypted Payload:\n\n ' + str(message) + '\n')
+    print('Encrypted Payload (Bytes):\n\n ' + str(message) + '\n')
 
     # Perform the decryption.
     decrypted_payload = dsl_status.cryptography.decrypt_bytes(mac_address, message)
 
     # Show the raw decrypted payload bytes.
     print(' =\n')
-    print('Decrypted Payload:\n\n ' + str(decrypted_payload) + '\n')
+    print('Decrypted Payload (Bytes):\n\n ' + str(decrypted_payload) + '\n')
 
     # Show the unpacked data.
     print(' ->\n')
     unpacked_payload = dsl_status.Message.convert_bytes_to_tuple(decrypted_payload)
-    print('Unpacked Payload:\n\n ' + str(unpacked_payload) + '\n')
+    print('Unpacked Payload (Tuple):\n\n ' + str(unpacked_payload) + '\n')
 
-    # Parse the DSL status.
+    # Parse the DSL Status message.
     message = dsl_status.Message(decrypted_payload)
 
-    # Output the parsed DSL status to the console.
+    # Output the parsed DSL Status message to the console.
     print(' ->\n')
     print('DSL Status:\n')
     print(message)
@@ -94,26 +94,26 @@ def show_generated_example():
         None
     """
 
-    print('----------------------------------------------------')
-    print('Example 2 : Generating a new DSL Status.')
-    print('----------------------------------------------------\n')
+    print('-----------------------------------------------')
+    print('Example 2 : Generating a new DSL Status message')
+    print('-----------------------------------------------\n')
 
     # Make a new DSL Status message.
     message = dsl_status.Message()
     message.modem_firmware_version = 'LOL!'.encode()
 
-    # Output the generated DSL status to the console.
+    # Output the generated DSL Status message to the console.
     print('DSL Status:\n')
     print(message)
 
-    # Output the DSL status bytes to the console.
+    # Output the DSL Status message bytes to the console.
     print(' ->\n')
-    print('Packed:\n\n ' + str(message.convert_to_bytes()) + '\n')
+    print('Packed (Bytes):\n\n ' + str(message.convert_to_bytes()) + '\n')
 
 # Launch the methods if invoked directly.
 if __name__ == '__main__':
 
-    # Show decrypting and parsing DSL Status sample data.
+    # Show decrypting and parsing DSL Status message sample data.
     show_decrypt_example()
 
     # Show how we can create a sample DSL Status message.

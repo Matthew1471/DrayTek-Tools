@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-This example listens for DrayTek® Vigor DSL Status broadcasts and decrypts and parses the data.
+This example listens for DrayTek® Vigor DSL Status message broadcasts and decrypts and parses them.
 """
 
 # We use the system socket APIs to listen for network traffic.
@@ -26,16 +26,16 @@ import socket
 # The program arguments are read.
 import sys
 
-# All the shared DrayTek® DSL Status functions are in this package.
+# All the shared DrayTek® DSL Status message functions are in this package.
 from draytek_tools import dsl_status
 
 
 def receive_data(mac_address):
     """
-    Listens to DSL Status broadcasts on the network.
+    Listens to DSL Status message broadcasts on the network.
 
     This method takes a MAC address, listens for DSL Status
-    broadcasts, decrypts them and displays them.
+    message broadcasts, decrypts them and displays them.
 
     Args:
         mac_address (string): The MAC address of the sending device.
@@ -44,9 +44,9 @@ def receive_data(mac_address):
         None
     """
 
-    # Listen for DSL status broadcasts (UDP).
+    # Create a UDP socket to listen for DSL Status messages.
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        # Bind to all interfaces UDP port 4944.
+        # Bind to all interfaces on port 4944.
         sock.bind(('0.0.0.0', 4944))
 
         # Maximum number of bytes to receive.
@@ -70,14 +70,14 @@ def receive_data(mac_address):
                     receive_buffer
                 )
 
-                # Debugging
-                # print('Raw:\n\n ' + str(decrypted_payload) + '\n')
+                # Debugging.
+                # print('Raw (Bytes):\n\n ' + str(decrypted_payload) + '\n')
                 # print(' ->\n')
                 # unpacked_payload = dsl_status.Message.convert_bytes_to_tuple(decrypted_payload)
-                # print('Unpacked:\n\n ' + str(unpacked_payload) + '\n')
+                # print('Unpacked (Tuple):\n\n ' + str(unpacked_payload) + '\n')
                 # print(' ->\n')
 
-                # Parse the DSL status message.
+                # Parse the DSL Status message.
                 message = dsl_status.Message(decrypted_payload)
 
                 # Output to console.

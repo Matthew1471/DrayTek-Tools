@@ -17,10 +17,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-This example spoofs DrayTek® Vigor DSL Status broadcasts.
+This example spoofs DrayTek® Vigor DSL Status message broadcasts.
 """
 
-# We use a socket to send the broadcasts.
+# We use the system socket APIs to send network traffic.
 import socket
 
 # The program arguments are read.
@@ -29,15 +29,15 @@ import sys
 # We use the sleep function to prevent flooding the receivers.
 from time import sleep
 
-# All the shared DrayTek® DSL Status cryptographic functions are in this package.
+# All the shared DrayTek® DSL Status message cryptographic functions are in this package.
 from draytek_tools.dsl_status import cryptography
 
 
 def send_data(mac_address):
     """
-    Sends DSL Status broadcasts on the network.
+    Sends DSL Status message broadcasts on the network.
 
-    This method takes a MAC address, encrypts DSL Status
+    This method takes a MAC address, encrypts DSL Status message
     samples and sends them.
 
     Args:
@@ -73,7 +73,7 @@ def send_data(mac_address):
     # Repeat until the program is exited.
     while True:
 
-        # Create a socket to send messages.
+        # Create a UDP socket to send DSL Status messages.
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
 
             # Permit sending of broadcast messages.
@@ -83,7 +83,7 @@ def send_data(mac_address):
             for message in messages:
 
                 # Notify the user a DSL Status message is being sent.
-                print('Sending DSL Status sample via UDP broadcast.')
+                print('Sending DSL Status message sample via UDP broadcast.')
 
                 # Get the actual bytes for the current message.
                 message_bytes = bytes.fromhex(message)

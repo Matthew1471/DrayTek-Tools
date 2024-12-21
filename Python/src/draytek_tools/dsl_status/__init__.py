@@ -17,14 +17,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-A module for interacting with DrayTek® Vigor's DSL Status messages.
+A module for interacting with DrayTek® Vigor's DSL Status broadcast packets.
 
 This module provides functionality to interact with the DrayTek® Vigor DSL Status broadcast packets.
 """
 
-# Allow the user to use Cryptography and Message by just importing draytek_tools.dsl_status
+# Allow the user to use cryptography and Message by just importing draytek_tools.dsl_status.
 from . import cryptography
 from .message import Message
 
-# Declare what should be offered in the Public API.
+# Declare what should be offered in the public API when a wildcard import statement is used.
 __all__ = ['cryptography', 'Message']
