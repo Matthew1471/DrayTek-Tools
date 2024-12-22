@@ -70,7 +70,7 @@ A copy of the license is included in the file link:Documentation/LICENSE.md[Docu
 == Authors
 
 *DrayTek-Tools* is led by https://github.com/Matthew1471[Matthew1471] and may have received contributions from {url-contributors}[other individuals] in GitHub's awesome community.
-The project was initiated in 2024 by https://github.com/Matthew1471[Matthew1471] after wanting to read the DSL Status broadcasts to inform his router when to initiate ISP failover.
+The project was initiated in 2024 by https://github.com/Matthew1471[Matthew1471] after wanting to read the DSL Status broadcasts to inform his router when to initiate WAN failover.
 
 This project also could not have existed without the help of link:https://github.com/sgarwood[@sgarwood] who provided the initial proof of concept.
 

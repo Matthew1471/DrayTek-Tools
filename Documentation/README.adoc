@@ -1,0 +1,153 @@
+= Documentation
+:toc:
+Matthew1471 <https://github.com/matthew1471[@Matthew1471]>;
+
+// Document Settings:
+
+// Set the ID Prefix and ID Separators to be consistent with GitHub so links work irrespective of rendering platform. (https://docs.asciidoctor.org/asciidoc/latest/sections/id-prefix-and-separator/)
+:idprefix:
+:idseparator: -
+
+// Any code examples will be in Python by default.
+:source-language: python
+
+ifndef::env-github[:icons: font]
+
+// Set the admonitions to have icons (Github Emojis) if rendered on GitHub (https://blog.mrhaki.com/2016/06/awesome-asciidoctor-using-admonition.html).
+ifdef::env-github[]
+:status:
+:caution-caption: :fire:
+:important-caption: :exclamation:
+:note-caption: :paperclip:
+:tip-caption: :bulb:
+:warning-caption: :warning:
+endif::[]
+
+// Document Variables:
+:release-version: 1.0
+:url-org: https://github.com/Matthew1471
+:url-repo: {url-org}/DrayTek-Tools
+:url-contributors: {url-repo}/graphs/contributors
+
+== Introduction
+
+DrayTek-Tools is an unofficial project providing a collection of tools for DrayTek(R)'s products.
+
+More details on the project are available from the xref:../README.adoc[project's homepage].
+
+== DSL Status Broadcast Documentation
+
+The DrayTek(R) Vigor DSL Status message broadcast is encrypted using AES-128 in CBC mode, with a key derived from 5 bytes of the SHA-1 hash of the MAC address converted to ASCII.
+
+This is probably best explained with an example, so given the following data:
+
+MAC Address: `aa:bb:cc:dd:ee:ff`
+
+Encrypted Payload (Bytes):
+
+`2052052030e2584e6d7f105167f7a0f4db1e921e1375577792f52fe5ed4f14e17722d021d3770aa9af3e591441a9ef02514c4e278ef5701a5ede036b232f94bd54e3b8fe4515cb163d78a8b2f40dd980f2f4841f6c9679b6bf4f94263824175b2f75bf6a51f9c2fb029590f95f39ca2d9efc7e4b`
+
+=== Calculating The Decryption Key and IV ===
+
+. The 6 MAC address bytes (`aa bb cc dd ee ff`) are then hashed using the SHA-1 algorithm to produce: `1bac77b2c94d3cee1ec9632be651c3b68f7a78bc`
+
+. The first 5 bytes of the SHA-1 digest are chosen:
++
+[width="100%"]
+|====================
+|Position|#1|#2|#3|#4|#5
+|Value|1B|AC|77|B2|C9
+|====================
+
+. They are converted from raw bytes to printable ASCII characters so they actually occupy 10 bytes:
++
+[width="100%"]
+|====================
+|Position|#1|#2|#3|#4|#5|#6|#7|#8|#9|#10  
+|Value|1|B|A|C|7|7|B|2|C|9  
+|====================
+
+. AES-128 requires a 16 byte key and IV. So the remaining bytes are padded with nulls:
++
+[width="100%"]
+|====================
+|Position|#1|#2|#3|#4|#5|#6|#7|#8|#9|#10|#11|#12|#13|#14|#15|#16
+|Value|1|B|A|C|7|7|B|2|C|9|\0|\0|\0|\0|\0|\0|\0
+|====================
+
+These 16 bytes are then used as both the key and the IV for the AES-128 algorithm in CBC mode.
+
+=== Decoding The Binary Data ===
+
+With the key calculated as above, the data can then start to be decrypted. To identify to the router a DSL Status broadcast, a protocol signature of `20 52 05 20` is used. It may also be used to determine the endian of the data as the first 2 bytes are the reverse of the second 2 bytes. These 4 bytes are not passed to the decryption algorithm and should be discarded.
+
+After ignoring the first 4 bytes and running the AES-128 CBC decryption the decrypted payload is now:
+
+[source,text]
+----
+\x010\xd7\x10\x04fkH\x00\x00\x0bm\x00\x00\x00\x00avg\xa0avg\xa0\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x03`C\x0e\x8c\x00\x83\xd6\x0112-3-2-3-0-5\x00\xff\xff\xff`2\xc8\x8817A\x00`\x94\x00\x00`\x93\xc5\xb0axg\xa0adSHOWTIME\x00\x00avg\xa0\x00\x00-\xb4\x00\x00\x00\x07a\x99\x00\x00
+----
+
+As you can see some of the strings are now visible. The data is stored in the following 112 fixed byte structure:
+
+
+.DSL Status Message Structure
+[width="100%",options="header"]
+|=============================================
+|Name                  |Type            |Length (bytes)
+|VDSL Upload Speed     |Unsigned Integer|4
+|VDSL Download Speed   |Unsigned Integer|4 
+|ADSL TX Cells         |Unsigned Integer|4
+|ADSL RX Cells         |Unsigned Integer|4 
+|ADSL TX CRC Errors    |Unsigned Integer|4 
+|ADSL RX CRC Errors    |Unsigned Integer|4 
+|xDSL Type             |Unsigned Integer|4 
+|Timestamp             |Unsigned Integer|4 
+|VDSL SNR Upload       |Unsigned Integer|4
+|VDSL SNR Download     |Unsigned Integer|4
+|ADSL Loop Attenuation |Unsigned Integer|4
+|ADSL SNR Margin       |Unsigned Integer|4
+|Modem Firmware Version|String          |20
+|VDSL Profile          |String          |4
+|Padding?              |Bytes           |14
+|State                 |String          |14
+|AES Padding?          |Bytes           |12
+|=============================================
+
+When unpacked into a tuple our sample data is:
+
+[source]
+----
+(19978000, 73821000, 2925, 0, 1635149728, 1635149728, 6, 0, 3, 3, 1615007372, 8640001, b'12-3-2-3-0-5\x00\xff\xff\xff`2\xc8\x88', b'17A\x00', b'`\x94\x00\x00`\x93\xc5\xb0axg\xa0ad', b'SHOWTIME\x00\x00avg\xa0', b'\x00\x00-\xb4\x00\x00\x00\x07a\x99\x00\x00')
+----
+[NOTE]
+====
+Note the strings are null-terminated and the data after the null character is just uninitialised data from the device. Values which are not applicable (such as ADSL fields when the modem is running in VDSL mode) are also left not initalised.
+====
+
+Which ultimately results in the following:
+
+[source,text]
+----
+ VDSL Upload Speed: 19978000 bps (19 Mbps)
+ VDSL Download Speed: 73821000 bps (73 Mbps)
+ ADSL TX Cells: 2925
+ ADSL RX Cells: 0
+ ADSL TX CRC Errors: 1635149728
+ ADSL RX CRC Errors: 1635149728
+ xDSL Type: 6 (6 = VDSL, 1 = ADSL)
+ Timestamp: 0
+ VDSL SNR Upload: 3
+ VDSL SNR Download: 3
+ ADSL Loop Attenuation: 1615007372
+ ADSL SNR Margin: 8640001
+ Modem Firmware Version: b'12-3-2-3-0-5'
+ VDSL Profile: b'17A'
+ Padding?: b'`\x94\x00\x00`\x93\xc5\xb0axg\xa0ad'
+ State: b'SHOWTIME'
+ AES Padding?: b'\x00\x00-\xb4\x00\x00\x00\x07a\x99\x00\x00'
+----
+[TIP]
+====
+Just because a DrayTek(R) device can send DSL Status broadcasts does not mean it has the capability to parse them on-device. The Vigor 166 and 167 lack the capability to receive them as there is no Ethernet WAN port. 
+====
