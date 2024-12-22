@@ -57,10 +57,10 @@ Encrypted Payload (Bytes):
 . The first 5 bytes of the SHA-1 digest are chosen:
 +
 [options="header,autowidth"]
-|=======================
-|Position|#1|#2|#3|#4|#5
-|Value   |1B|AC|77|B2|C9
-|=======================
+|=================================
+|Position|  #1|  #2|  #3|  #4|  #5
+|Value   |0x1B|0xAC|0x77|0xB2|0xC9
+|=================================
 
 . The 5 bytes are converted from raw bytes to an uppercase string of their ASCII character equivalents so they now actually occupy 10 bytes:
 +
