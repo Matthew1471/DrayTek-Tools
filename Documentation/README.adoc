@@ -135,7 +135,7 @@ When unpacked into a tuple our sample data is:
 ----
 [NOTE]
 ====
-Note the strings are null-terminated and the data after the null character is just uninitialised data from the device. Values which are not applicable (such as ADSL fields when the modem is running in VDSL mode) are also left not initalised.
+Note the strings are null-terminated and the data after the null character is just uninitialised data from the device. Values which are not applicable (such as ADSL fields when the modem is running in VDSL mode) are also uninitalised.
 ====
 
 Which ultimately results in the following:
