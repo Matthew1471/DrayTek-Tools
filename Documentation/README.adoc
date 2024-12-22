@@ -164,5 +164,5 @@ Which ultimately results in the following:
 
 [TIP]
 ====
-Just because a DrayTek(R) device can send DSL Status broadcasts does not mean it has the capability to parse them on-device. The Vigor 166 and 167 lack the capability to receive them as there is no Ethernet WAN port.
+Just because a DrayTek(R) device can send DSL Status broadcasts does not mean it has the capability to receive them. The Vigor 166 and 167 lack the capability to receive them as there is no Ethernet WAN port.
 ====
