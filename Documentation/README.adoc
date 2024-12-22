@@ -53,27 +53,27 @@ Encrypted Payload (Bytes):
 
 . The first 5 bytes of the SHA-1 digest are chosen:
 +
-[width="100%"]
-|====================
+[options="autowidth"]
+|=======================
 |Position|#1|#2|#3|#4|#5
-|Value|1B|AC|77|B2|C9
-|====================
+|Value   |1B|AC|77|B2|C9
+|=======================
 
 . They are converted from raw bytes to printable ASCII characters so they actually occupy 10 bytes:
 +
-[width="100%"]
-|====================
-|Position|#1|#2|#3|#4|#5|#6|#7|#8|#9|#10  
-|Value|1|B|A|C|7|7|B|2|C|9  
-|====================
+[options="autowidth"]
+|=======================================
+|Position|#1|#2|#3|#4|#5|#6|#7|#8|#9|#10
+|Value   | 1| B| A| C| 7| 7| B| 2| C|  9
+|=======================================
 
 . AES-128 requires a 16 byte key and IV. So the remaining bytes are padded with nulls:
 +
-[width="100%"]
-|====================
+[options="autowidth"]
+|===============================================================
 |Position|#1|#2|#3|#4|#5|#6|#7|#8|#9|#10|#11|#12|#13|#14|#15|#16
-|Value|1|B|A|C|7|7|B|2|C|9|\0|\0|\0|\0|\0|\0|\0
-|====================
+|Value   | 1| B| A| C| 7| 7| B| 2| C|  9| \0| \0| \0| \0| \0| \0
+|===============================================================
 
 These 16 bytes are then used as both the key and the IV for the AES-128 algorithm in CBC mode.
 
@@ -92,17 +92,17 @@ As you can see some of the strings are now visible. The data is stored in the fo
 
 
 .DSL Status Message Structure
-[width="100%",options="header"]
-|=============================================
+[options="header,autowidth"]
+|======================================================
 |Name                  |Type            |Length (bytes)
 |VDSL Upload Speed     |Unsigned Integer|4
-|VDSL Download Speed   |Unsigned Integer|4 
+|VDSL Download Speed   |Unsigned Integer|4
 |ADSL TX Cells         |Unsigned Integer|4
-|ADSL RX Cells         |Unsigned Integer|4 
-|ADSL TX CRC Errors    |Unsigned Integer|4 
-|ADSL RX CRC Errors    |Unsigned Integer|4 
-|xDSL Type             |Unsigned Integer|4 
-|Timestamp             |Unsigned Integer|4 
+|ADSL RX Cells         |Unsigned Integer|4
+|ADSL TX CRC Errors    |Unsigned Integer|4
+|ADSL RX CRC Errors    |Unsigned Integer|4
+|xDSL Type             |Unsigned Integer|4
+|Timestamp             |Unsigned Integer|4
 |VDSL SNR Upload       |Unsigned Integer|4
 |VDSL SNR Download     |Unsigned Integer|4
 |ADSL Loop Attenuation |Unsigned Integer|4
@@ -112,7 +112,13 @@ As you can see some of the strings are now visible. The data is stored in the fo
 |Padding?              |Bytes           |14
 |State                 |String          |14
 |AES Padding?          |Bytes           |12
-|=============================================
+|======================================================
+
+[TIP]
+====
+Some of the meaning behind these values is best explained on the link:https://www.draytek.co.uk/support/guides/kb-vigor-diagnostics-adsl-statistics[DrayTek(R) website].
+====
+
 
 When unpacked into a tuple our sample data is:
 
@@ -127,27 +133,29 @@ Note the strings are null-terminated and the data after the null character is ju
 
 Which ultimately results in the following:
 
-[source,text]
-----
- VDSL Upload Speed: 19978000 bps (19 Mbps)
- VDSL Download Speed: 73821000 bps (73 Mbps)
- ADSL TX Cells: 2925
- ADSL RX Cells: 0
- ADSL TX CRC Errors: 1635149728
- ADSL RX CRC Errors: 1635149728
- xDSL Type: 6 (6 = VDSL, 1 = ADSL)
- Timestamp: 0
- VDSL SNR Upload: 3
- VDSL SNR Download: 3
- ADSL Loop Attenuation: 1615007372
- ADSL SNR Margin: 8640001
- Modem Firmware Version: b'12-3-2-3-0-5'
- VDSL Profile: b'17A'
- Padding?: b'`\x94\x00\x00`\x93\xc5\xb0axg\xa0ad'
- State: b'SHOWTIME'
- AES Padding?: b'\x00\x00-\xb4\x00\x00\x00\x07a\x99\x00\x00'
-----
+[options="header,autowidth"]
+|====================================================================
+|Parameter             |Value
+|VDSL Upload Speed     |19978000 bps (19 Mbps)
+|VDSL Download Speed   |73821000 bps (73 Mbps)
+|ADSL TX Cells         |2925
+|ADSL RX Cells         |0
+|ADSL TX CRC Errors    |1635149728
+|ADSL RX CRC Errors    |1635149728
+|xDSL Type             |6 (6 = VDSL, 1 = ADSL)
+|Timestamp             |0
+|VDSL SNR Upload       |3
+|VDSL SNR Download     |3
+|ADSL Loop Attenuation |1615007372
+|ADSL SNR Margin       |8640001
+|Modem Firmware Version|b'12-3-2-3-0-5'
+|VDSL Profile          |b'17A'
+|Padding?              |b'`\x94\x00\x00`\x93\xc5\xb0axg\xa0ad'
+|State                 |b'SHOWTIME'
+|AES Padding?          |b'\x00\x00-\xb4\x00\x00\x00\x07a\x99\x00\x00'
+|====================================================================
+
 [TIP]
 ====
-Just because a DrayTek(R) device can send DSL Status broadcasts does not mean it has the capability to parse them on-device. The Vigor 166 and 167 lack the capability to receive them as there is no Ethernet WAN port. 
+Just because a DrayTek(R) device can send DSL Status broadcasts does not mean it has the capability to parse them on-device. The Vigor 166 and 167 lack the capability to receive them as there is no Ethernet WAN port.
 ====
