@@ -37,19 +37,22 @@ More details on the project are available from the xref:../README.adoc[project's
 
 == DSL Status Broadcast Documentation
 
-The DrayTek(R) Vigor DSL Status message broadcast is encrypted using AES-128 in CBC mode, with a key derived from 5 bytes of the SHA-1 hash of the MAC address converted to ASCII.
+The DrayTek(R) Vigor DSL Status message broadcasts are encrypted using AES-128 in CBC mode, with a key derived from the first 5 bytes of the SHA-1 hash of the MAC address, then converted to ASCII and padded with nulls.
 
 This is probably best explained with an example, so given the following data:
 
-MAC Address: `aa:bb:cc:dd:ee:ff`
+MAC Address: `AA:BB:CC:DD:EE:FF`
 
 Encrypted Payload (Bytes):
 
-`2052052030e2584e6d7f105167f7a0f4db1e921e1375577792f52fe5ed4f14e17722d021d3770aa9af3e591441a9ef02514c4e278ef5701a5ede036b232f94bd54e3b8fe4515cb163d78a8b2f40dd980f2f4841f6c9679b6bf4f94263824175b2f75bf6a51f9c2fb029590f95f39ca2d9efc7e4b`
+[source,text]
+----
+20 52 05 20 30 E2 58 4E 6D 7F 10 51 67 F7 A0 F4 DB 1E 92 1E 13 75 57 77 92 F5 2F E5 ED 4F 14 E1 77 22 D0 21 D3 77 0A A9 AF 3E 59 14 41 A9 EF 02 51 4C 4E 27 8E F5 70 1A 5E DE 03 6B 23 2F 94 BD 54 E3 B8 FE 45 15 CB 16 3D 78 A8 B2 F4 0D D9 80 F2 F4 84 1F 6C 96 79 B6 BF 4F 94 26 38 24 17 5B 2F 75 BF 6A 51 F9 C2 FB 02 95 90 F9 5F 39 CA 2D 9E FC 7E 4B
+----
 
 === Calculating The Decryption Key and IV ===
 
-. The 6 MAC address bytes (`aa bb cc dd ee ff`) are then hashed using the SHA-1 algorithm to produce: `1bac77b2c94d3cee1ec9632be651c3b68f7a78bc`
+. The 6 MAC address bytes (`AA BB CC DD EE FF`) are then hashed using the SHA-1 algorithm to produce: `1B AC 77 B2 C9 4D 3C EE 1E C9 63 2B E6 51 C3 B6 8F 7A 78 BC`.
 
 . The first 5 bytes of the SHA-1 digest are chosen:
 +
@@ -59,7 +62,7 @@ Encrypted Payload (Bytes):
 |Value   |1B|AC|77|B2|C9
 |=======================
 
-. They are converted from raw bytes to printable ASCII characters so they actually occupy 10 bytes:
+. The 5 bytes are converted from raw bytes to an uppercase string of their ASCII characters so they now actually occupy 10 bytes:
 +
 [options="autowidth"]
 |=======================================
@@ -67,7 +70,7 @@ Encrypted Payload (Bytes):
 |Value   | 1| B| A| C| 7| 7| B| 2| C|  9
 |=======================================
 
-. AES-128 requires a 16 byte key and IV. So the remaining bytes are padded with nulls:
+. AES-128 requires a 16 byte key and IV; so the remaining bytes are padded with nulls:
 +
 [options="autowidth"]
 |===============================================================
