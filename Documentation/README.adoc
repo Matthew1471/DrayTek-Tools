@@ -37,7 +37,7 @@ More details on the project are available from the xref:../README.adoc[project's
 
 == DSL Status Broadcast Documentation
 
-The DrayTek(R) Vigor DSL Status message broadcasts are encrypted using AES-128 in CBC mode, with a key derived from the first 5 bytes of the SHA-1 hash of the MAC address, then converted to ASCII and padded with nulls.
+The DrayTek(R) Vigor DSL Status message broadcasts are encrypted using AES-128 in CBC mode, with a key derived from the first 5 bytes of the SHA-1 hash of the MAC address converted to a string of uppercase hexadecimal characters and padded with nulls.
 
 This is probably best explained with an example, so given the following data:
 
@@ -50,11 +50,13 @@ Encrypted Payload (Bytes):
 20 52 05 20 30 E2 58 4E 6D 7F 10 51 67 F7 A0 F4 DB 1E 92 1E 13 75 57 77 92 F5 2F E5 ED 4F 14 E1 77 22 D0 21 D3 77 0A A9 AF 3E 59 14 41 A9 EF 02 51 4C 4E 27 8E F5 70 1A 5E DE 03 6B 23 2F 94 BD 54 E3 B8 FE 45 15 CB 16 3D 78 A8 B2 F4 0D D9 80 F2 F4 84 1F 6C 96 79 B6 BF 4F 94 26 38 24 17 5B 2F 75 BF 6A 51 F9 C2 FB 02 95 90 F9 5F 39 CA 2D 9E FC 7E 4B
 ----
 
+We will need to calculate the key to decrypt the data.
+
 === Calculating The Decryption Key and IV ===
 
-. The 6 MAC address bytes (`AA BB CC DD EE FF`) are then hashed using the SHA-1 algorithm to produce: `1B AC 77 B2 C9 4D 3C EE 1E C9 63 2B E6 51 C3 B6 8F 7A 78 BC`.
+. The 6 MAC address bytes (`AA BB CC DD EE FF`) are hashed using the SHA-1 algorithm to produce: `1B AC 77 B2 C9 4D 3C EE 1E C9 63 2B E6 51 C3 B6 8F 7A 78 BC`.
 
-. The first 5 bytes of the SHA-1 digest are chosen:
+. The first 5 bytes of the SHA-1 digest are copied:
 +
 [options="header,autowidth"]
 |=================================
@@ -62,7 +64,7 @@ Encrypted Payload (Bytes):
 |Value   |0x1B|0xAC|0x77|0xB2|0xC9
 |=================================
 
-. The 5 bytes are converted from raw bytes to an uppercase string of their ASCII character equivalents so they now actually occupy 10 bytes:
+. The 5 bytes are converted from raw bytes to a string of uppercase hexadecimal characters (1 byte is 2 ASCII characters) so they now actually occupy 10 bytes:
 +
 [options="header,autowidth"]
 |===========================================================
