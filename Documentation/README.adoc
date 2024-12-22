@@ -56,27 +56,29 @@ Encrypted Payload (Bytes):
 
 . The first 5 bytes of the SHA-1 digest are chosen:
 +
-[options="autowidth"]
+[options="header,autowidth"]
 |=======================
 |Position|#1|#2|#3|#4|#5
 |Value   |1B|AC|77|B2|C9
 |=======================
 
-. The 5 bytes are converted from raw bytes to an uppercase string of their ASCII characters so they now actually occupy 10 bytes:
+. The 5 bytes are converted from raw bytes to an uppercase string of their ASCII character equivalents so they now actually occupy 10 bytes:
 +
-[options="autowidth"]
-|=======================================
-|Position|#1|#2|#3|#4|#5|#6|#7|#8|#9|#10
-|Value   | 1| B| A| C| 7| 7| B| 2| C|  9
-|=======================================
+[options="header,autowidth"]
+|===========================================================
+|Position |  #1|  #2|  #3|  #4|  #5|  #6|  #7|  #8|  #9| #10
+|Character|   1|   B|   A|   C|   7|   7|   B|   2|   C|   9
+|Value    |0x31|0x42|0x41|0x43|0x37|0x37|0x42|0x32|0x43|0x39
+|===========================================================
 
 . AES-128 requires a 16 byte key and IV; so the remaining bytes are padded with nulls:
 +
-[options="autowidth"]
-|===============================================================
-|Position|#1|#2|#3|#4|#5|#6|#7|#8|#9|#10|#11|#12|#13|#14|#15|#16
-|Value   | 1| B| A| C| 7| 7| B| 2| C|  9| \0| \0| \0| \0| \0| \0
-|===============================================================
+[options="header,autowidth"]
+|===================================================================================
+|Position |  #1|  #2|  #3|  #4|  #5|  #6|  #7|  #8|  #9| #10|#11|#12|#13|#14|#15|#16
+|Character|   1|   B|   A|   C|   7|   7|   B|   2|   C|   9| \0| \0| \0| \0| \0| \0
+|Value    |0x31|0x42|0x41|0x43|0x37|0x37|0x42|0x32|0x43|0x39|0x0|0x0|0x0|0x0|0x0|0x0
+|===================================================================================
 
 These 16 bytes are then used as both the key and the IV for the AES-128 algorithm in CBC mode.
 
