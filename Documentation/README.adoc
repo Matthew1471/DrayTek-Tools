@@ -52,7 +52,7 @@ Encrypted Payload (Bytes):
 
 We will need to calculate the key to decrypt the data.
 
-=== Calculating The Decryption Key and IV ===
+=== Calculating The Decryption Key and IV
 
 . The 6 MAC address bytes (`AA BB CC DD EE FF`) are hashed using the SHA-1 algorithm to produce: `1B AC 77 B2 C9 4D 3C EE 1E C9 63 2B E6 51 C3 B6 8F 7A 78 BC`.
 
@@ -84,7 +84,7 @@ We will need to calculate the key to decrypt the data.
 
 These 16 bytes are then used as both the key and the IV for the AES-128 algorithm in CBC mode.
 
-=== Decoding The Binary Data ===
+=== Decoding The Binary Data
 
 With the key calculated as above, the data can then start to be decrypted. To identify to the router a DSL Status broadcast, a protocol signature of `20 52 05 20` is used. It may also be used to determine the endian of the data as the first 2 bytes are the reverse of the second 2 bytes. These 4 bytes are not passed to the decryption algorithm and should be discarded.
 
