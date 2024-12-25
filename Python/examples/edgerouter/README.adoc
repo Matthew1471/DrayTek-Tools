@@ -37,7 +37,7 @@ More details on the project are available from the xref:../../../README.adoc[pro
 
 == Load Balance Route-Test Documentation
 
-The Ubiquiti(C) EdgeRouter(R) supports WAN Load-Balancing and as part of this can perform route tests to see if an interface is reachable or unreachable. If the EdgeRouter(R) determines an interface is unreachable it will automatically make route table changes to ensure traffic is routed over another interface.
+The Ubiquiti(C) EdgeRouter(R) supports WAN Load-Balancing and Failover and as part of this can perform route tests to see if an interface is reachable or unreachable. If the EdgeRouter(R) determines an interface is unreachable it will automatically make route table changes to ensure traffic is routed over another interface.
 
 Typically, a route-test is set to ping Internet accessible hosts or a default gateway to determine if an interface is up, but this either wastes bandwidth or pings a modem that will respond despite the Internet connection being down.
 
@@ -58,7 +58,7 @@ To configure it, the script should be edited to include the correct decryption k
 
 Then EdgeOS can be configured with commands similar to this:
 
-[source]
+[source,text]
 ----
 set load-balance group G interface pppoe0 route-test count failure 1
 set load-balance group G interface pppoe0 route-test count success 1
@@ -68,6 +68,8 @@ set load-balance group G interface pppoe0 route-test type script /config/scripts
 ----
 
 This will cause the script to run every 15 seconds (after a 5 second delay) and if the DSL Status returned is negative even once will trigger the actions and will recover on a single success.
+
+Further information on load-balancing is available in the link:https://help.ui.com/hc/en-us/articles/205145990-EdgeRouter-WAN-Load-Balancing[Ubiquiti EdgeRouter WAN Load-Balancing documentation].
 
 === Debugging
 
