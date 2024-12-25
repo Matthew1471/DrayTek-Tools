@@ -32,6 +32,9 @@ import hashlib
 # The program arguments are read.
 import sys
 
+# Pylint: f-string cannot be used in Python 2.x.
+# pylint: disable=consider-using-f-string
+
 # Check whether the user has supplied a source MAC address.
 if len(sys.argv) != 2:
     print('Usage:')
@@ -46,6 +49,9 @@ mac_address = sys.argv[1]
 if isinstance(mac_address, str):
     mac_address = binascii.unhexlify(mac_address.replace(':', ''))
 
+# Pylint: "digest" is not a constant; false positive.
+# pylint: disable=invalid-name
+
 # The encryption/decryption key is the first 5 bytes from the SHA-1 digest of the MAC
 # address bytes.
 digest = hashlib.sha1(mac_address).digest()[:5]
@@ -57,6 +63,8 @@ digest = binascii.hexlify(digest).upper()
 # Get the uppercase hexadecimal characters for the hexadecimal characters
 # (to be supplied to OpenSSL as -K).
 digest = binascii.hexlify(digest).upper()
+
+# pylint: enable=invalid-name
 
 # Output the decryption key.
 print('DECRYPT_KEY = {}'.format(digest.decode()))

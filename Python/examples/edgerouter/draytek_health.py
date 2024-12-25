@@ -35,9 +35,12 @@ import sys
 # Get the key for your specific modem from the keygen script.
 DECRYPT_KEY = '31424143373742324339'
 
+# Pylint: f-string cannot be used in Python 2.x.
+# pylint: disable=consider-using-f-string
+
 # Check whether the user has invoked this directly.
 if len(sys.argv) != 4:
-    print('Usage: {} <load_balance_group> <test_interface> <current_status>').format(sys.argv[0])
+    print('Usage: {} <load_balance_group> <test_interface> <current_status>'.format(sys.argv[0]))
     sys.exit(1)
 
 # Create a UDP socket to listen for DSL Status messages.
@@ -50,75 +53,82 @@ sock.settimeout(11)
 sock.bind(('0.0.0.0', 4944))
 
 # Maximum number of bytes to receive.
-max_receive_bytes = 116
+MAX_RECEIVE_BYTES = 116
 
 try:
     # If a payload of the incorrect length is received we try again.
     while True:
         # Attempt to receive a broadcast packet.
-        receive_buffer, ip_address = sock.recvfrom(max_receive_bytes)
+        receive_buffer, ip_address = sock.recvfrom(MAX_RECEIVE_BYTES)
 
         # Check to see if this would be the right length for a DSL Status message.
-        if len(receive_buffer) == 116:
-            # Run the OpenSSL command using subprocess to perform the decryption.
-            process = subprocess.Popen([
-                "openssl", "enc", "-d", "-aes-128-cbc",
-                "-K", DECRYPT_KEY,
-                "-iv", DECRYPT_KEY,
-                "-nopad"
-            ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if len(receive_buffer) != 116:
+            # Wait for another message as this is not a DSL Status message.
+            continue
 
-            # Pass the encrypted data through stdin and obtain the output and any errors.
-            stdout, stderr = process.communicate(input=receive_buffer[4:])
+        # Run the OpenSSL command using subprocess to perform the decryption.
+        # Pylint: Context manager for subprocess not available in Python 2.x.
+        # pylint: disable=consider-using-with
+        process = subprocess.Popen([
+            "openssl", "enc", "-d", "-aes-128-cbc",
+            "-K", DECRYPT_KEY,
+            "-iv", DECRYPT_KEY,
+            "-nopad"
+        ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # pylint: enable=consider-using-with
 
-            # Did OpenSSL decrypt the contents?
-            if process.returncode == 0:
-                # Only obtain the status (this script needs to be performant)
-                decrypted_status = str(stdout[86:-14].split(b'\0')[0])
+        # Pass the encrypted data through stdin and obtain the output and any errors.
+        stdout, stderr = process.communicate(input=receive_buffer[4:])
 
-                # Check the DSL status.
-                if decrypted_status == 'SHOWTIME':
+        # Did OpenSSL fail to decrypt the contents?
+        if process.returncode != 0:
+            # Failed to decrypt (DSL status unknown); Write to log.
+            subprocess.call([
+                'logger',
+                '-t draytek_health',
+                'WLB: Decryption failed "{}".'.format(stderr)
+            ])
 
-                    # If the connection is not marked as currently okay, log that it now seems okay.
-                    if sys.argv[3] != 'OK':
-                        subprocess.call([
-                            'logger',
-                            '-t draytek_health',
-                            'WLB: Load-Balance group {} interface {} ({}) DSL status now good.'.format(
-                                sys.argv[1],
-                                sys.argv[2],
-                                sys.argv[3]
-                            )
-                        ])
+            # Return a DSL Status success out of caution.
+            sys.exit(0)
 
-                    # Return Success.
-                    sys.exit(0)
-                else:
-                    # Failed; Write to log.
-                    subprocess.call([
-                        'logger',
-                        '-t draytek_health',
-                        'WLB: Load-Balance group {} interface {} ({}) DSL status bad ({}).'.format(
-                            sys.argv[1],
-                            sys.argv[2],
-                            sys.argv[3],
-                            str(decrypted_status)
-                        )
-                    ])
+        # Only obtain the status (this script needs to be performant)
+        # PyLint: Not a constant; false positive.
+        # pylint: disable=invalid-name
+        decrypted_status = str(stdout[86:-14].split(b'\0', 1)[0])
 
-                    # Return failure.
-                    sys.exit(1)
-            # Failed to decrypt (DSL status unknown).
-            else:
-                # OpenSSL issue; Write to log.
+        # Check the DSL status.
+        if decrypted_status == 'SHOWTIME':
+
+            # If the connection is not marked as currently okay, log that it now seems okay.
+            if sys.argv[3] != 'OK':
                 subprocess.call([
                     'logger',
                     '-t draytek_health',
-                    'WLB: Decryption failed "{}".'.format(stderr)
+                    'WLB: Load-Balance group {} interface {} ({}) DSL status now good.'.format(
+                        sys.argv[1],
+                        sys.argv[2],
+                        sys.argv[3]
+                    )
                 ])
 
-                # Return a DSL Status success out of caution.
-                sys.exit(0)
+            # Return Success.
+            sys.exit(0)
+        else:
+            # Failed; Write to log.
+            subprocess.call([
+                'logger',
+                '-t draytek_health',
+                'WLB: Load-Balance group {} interface {} ({}) DSL status bad ({}).'.format(
+                    sys.argv[1],
+                    sys.argv[2],
+                    sys.argv[3],
+                    str(decrypted_status)
+                )
+            ])
+
+            # Return failure.
+            sys.exit(1)
 
 except socket.timeout:
 

@@ -59,29 +59,32 @@ def receive_data(mac_address):
             receive_buffer, ip_address = sock.recvfrom(max_receive_bytes)
 
             # Check to see if this would be the right length for a DSL Status message.
-            if len(receive_buffer) == 116:
-                # Notify the user a message has been received.
-                print(f'Received UDP Datagram from {ip_address[0]} of correct size;'
-                      f' using MAC address {mac_address} to decrypt contents:\n')
+            if len(receive_buffer) != 116:
+                # Wait for another message as this is not a DSL Status message.
+                continue
 
-                # Perform the decryption.
-                decrypted_payload = dsl_status.cryptography.decrypt_bytes(
-                    mac_address,
-                    receive_buffer
-                )
+            # Notify the user a message has been received.
+            print(f'Received UDP Datagram from {ip_address[0]} of correct size;'
+                    f' using MAC address {mac_address} to decrypt contents:\n')
 
-                # Debugging.
-                # print('Raw (Bytes):\n\n ' + str(decrypted_payload) + '\n')
-                # print(' ->\n')
-                # unpacked_payload = dsl_status.Message.convert_bytes_to_tuple(decrypted_payload)
-                # print('Unpacked (Tuple):\n\n ' + str(unpacked_payload) + '\n')
-                # print(' ->\n')
+            # Perform the decryption.
+            decrypted_payload = dsl_status.cryptography.decrypt_bytes(
+                mac_address,
+                receive_buffer
+            )
 
-                # Parse the DSL Status message.
-                message = dsl_status.Message(decrypted_payload)
+            # Debugging.
+            # print('Raw (Bytes):\n\n ' + str(decrypted_payload) + '\n')
+            # print(' ->\n')
+            # unpacked_payload = dsl_status.Message.convert_bytes_to_tuple(decrypted_payload)
+            # print('Unpacked (Tuple):\n\n ' + str(unpacked_payload) + '\n')
+            # print(' ->\n')
 
-                # Output to console.
-                print(message)
+            # Parse the DSL Status message.
+            message = dsl_status.Message(decrypted_payload)
+
+            # Output to console.
+            print(message)
 
 if __name__ == '__main__':
 
