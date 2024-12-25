@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-This script generates in advance the key needed to decrypt DrayTek DSL Status broadcasts.
+This script generates in advance the key needed to decrypt DrayTek® DSL Status broadcasts.
 
 The key is not calculated by draytek_health.py to reduce computational workload when it is run
 every >10 seconds.
@@ -38,7 +38,7 @@ import sys
 # Check whether the user has supplied a source MAC address.
 if len(sys.argv) != 2:
     print('Usage:')
-    print('{} <MAC Address of Vigor DSL Modem>'.format(sys.argv[0]))
+    print('{} <MAC Address of Vigor™ DSL Modem>'.format(sys.argv[0]))
     print('e.g. {} aa:bb:cc:dd:ee:ff'.format(sys.argv[0]))
     sys.exit(1)
 

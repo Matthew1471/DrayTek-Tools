@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-This listens for a DrayTek® Vigor DSL Status message broadcast, decrypts and parses it.
+This listens for a DrayTek® Vigor™ DSL Status message broadcast, decrypts and parses it.
 If the modem is reporting success then it returns a 0, otherwise it returns non-zero and EdgeOS
 may then choose to initiate WAN failover.
 """

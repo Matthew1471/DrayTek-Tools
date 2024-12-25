@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-DrayTek® Vigor DSL Status Message Module.
+DrayTek® Vigor™ DSL Status Message Module.
 This module provides methods for representing DSL Status broadcasts.
 """
 
@@ -28,7 +28,7 @@ import struct
 # This is a data class so is expected to have many instance attributes.
 class Message:
     """
-    A class to represent a single DrayTek® Vigor DSL Status broadcast message.
+    A class to represent a single DrayTek® Vigor™ DSL Status broadcast message.
     """
 
     # The format string for the struct pack and unpack methods.

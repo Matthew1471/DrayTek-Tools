@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-This example spoofs DrayTek® Vigor DSL Status message broadcasts.
+This example spoofs DrayTek® Vigor™ DSL Status message broadcasts.
 """
 
 # We use the system socket APIs to send network traffic.

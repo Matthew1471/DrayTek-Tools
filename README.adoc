@@ -1,4 +1,4 @@
-= DrayTek Tools
+= DrayTek(R) Tools
 :toc:
 Matthew1471 <https://github.com/matthew1471[@Matthew1471]>;
 
@@ -33,7 +33,7 @@ endif::[]
 
 DayTek-Tools is an unofficial project providing a collection of tools for DrayTek(R)'s products.
 
-This project is focusing primarily on the DrayTek(R) "DSL Status" broadcast feature available on a range of DrayTek(R) Vigor products.
+This project is focusing primarily on the DrayTek(R) "DSL Status" broadcast feature available on a range of DrayTek(R) Vigor(TM) products.
 
 WARNING: DrayTek(R) may choose to change any product behaviour in subsequent updates without warning.
 

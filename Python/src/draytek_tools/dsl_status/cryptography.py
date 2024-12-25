@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-DrayTek® Vigor DSL Status Cryptography Module.
+DrayTek® Vigor™ DSL Status Cryptography Module.
 This module provides methods for encrypting/decrypting DSL Status message broadcasts.
 """
 

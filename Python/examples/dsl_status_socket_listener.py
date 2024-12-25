@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-This example listens for DrayTek® Vigor DSL Status message broadcasts and decrypts and parses them.
+This example listens for DrayTek® Vigor™ DSL Status message broadcasts and decrypts and parses them.
 """
 
 # We use the system socket APIs to listen for network traffic.
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     # Check whether the user has supplied a source MAC address.
     if len(sys.argv) != 2:
         print('Usage:')
-        print(f'{sys.argv[0]} <MAC Address of Vigor DSL Modem>')
+        print(f'{sys.argv[0]} <MAC Address of Vigor™ DSL Modem>')
         print(f'e.g. {sys.argv[0]} aa:bb:cc:dd:ee:ff')
         sys.exit(1)
 

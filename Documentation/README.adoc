@@ -37,7 +37,7 @@ More details on the project are available from the xref:../README.adoc[project's
 
 == DSL Status Broadcast Documentation
 
-The DrayTek(R) Vigor DSL Status message broadcasts are encrypted using AES-128 in CBC mode, with a key derived from the first 5 bytes of the SHA-1 hash of the MAC address converted to a string of uppercase hexadecimal characters and padded with nulls.
+The DrayTek(R) Vigor(TM) DSL Status message broadcasts are encrypted using AES-128 in CBC mode, with a key derived from the first 5 bytes of the SHA-1 hash of the MAC address converted to a string of uppercase hexadecimal characters and padded with nulls.
 
 This is probably best explained with an example, so given the following data:
 
@@ -164,5 +164,5 @@ Which ultimately results in the following:
 
 [TIP]
 ====
-Just because a DrayTek(R) device can send DSL Status broadcasts does not mean it has the capability to receive them. The Vigor 166 and 167 lack the capability to receive them as there is no Ethernet WAN port.
+Just because a DrayTek(R) device can send DSL Status broadcasts does not mean it has the capability to receive them. The Vigor(TM) 166 and 167 lack the capability to receive them as there is no Ethernet WAN port.
 ====
