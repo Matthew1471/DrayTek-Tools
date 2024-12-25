@@ -50,7 +50,7 @@ class Message:
         """
 
         # Unlike Python, C uses null-terminated strings, truncate them.
-        return string_bytes.split(b'\0', 1)[0]
+        return string_bytes.split(sep=b'\0', maxsplit=1)[0]
 
     @staticmethod
     def convert_bytes_to_tuple(payload):
