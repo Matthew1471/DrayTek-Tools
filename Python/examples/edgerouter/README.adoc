@@ -54,7 +54,7 @@ To be able to decrypt the DSL Status messages you first need to obtain your decr
 
 === EdgeOS Configuration
 
-To configure it, the script should be edited to include the correct decryption key for your modem and copied to the `/config/scripts/` folder. Then, simply set this script to run for your load-balance group (e.g. `G`) and interface (`pppoe0`), the script itself listens for any DrayTek device and will have no concept of the interface you configure it for, however EdgeRouter will change the availability for whatever interface the script is assigned to.
+To configure it, the script should be edited to include the correct decryption key for your modem and copied to the `/config/scripts/` folder. Then, simply set this script to run for your load-balance group (e.g. `G`) and interface (`pppoe0`), the script itself listens for any DrayTek(R) device and will have no concept of the interface you configure it for, however EdgeRouter will change the availability for whatever interface the script is assigned to.
 
 Then EdgeOS can be configured with commands similar to this:
 
