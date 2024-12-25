@@ -41,7 +41,7 @@ The Ubiquiti(C) EdgeRouter(R) supports WAN Load-Balancing and Failover and as pa
 
 Typically, a route-test is set to ping Internet accessible hosts or a default gateway to determine if an interface is up, but this either wastes bandwidth or pings a modem that will respond despite the Internet connection being down.
 
-Instead this script was created, it's a modified Python 2.7.13 version of the library but made to be performant to run every 10-15 seconds.
+Instead this script was created, it's a modified Python 2.7.13 compatible version of the library but made to be performant to run every 10-15 seconds.
 
 [TIP]
 ====
