@@ -52,11 +52,11 @@ You will have to run `chmod +x /config/scripts/draytek_*.py` after these scripts
 
 To be able to decrypt the DSL Status messages you first need to obtain your decryption key. Running `./draytek_keygen.py` with your MAC address (e.g. `./draytek_keygen.py aa:bb:cc:dd:ee:ff`) will give you the correct key for that modem's MAC address.
 
-=== EdgeOS Configuration
+=== EdgeOS(R) Configuration
 
 To configure it, the script should be edited to include the correct decryption key for your modem and copied to the `/config/scripts/` folder. Then, simply set this script to run for your load-balance group (e.g. `G`) and interface (e.g. `pppoe0`), the script itself listens for any DrayTek(R) device and will have no concept of the interface you configure it for, however EdgeRouter(R) will change the availability for whatever interface the script is assigned to.
 
-Then EdgeOS can be configured with commands similar to this:
+Then EdgeOS(R) can be configured with commands similar to this:
 
 [source,text]
 ----
@@ -69,7 +69,7 @@ set load-balance group G interface pppoe0 route-test type script /config/scripts
 
 This will cause the script to run every 15 seconds (after a 5 second delay) and if the DSL Status returned is negative even once will trigger the failover actions and will recover on a single success.
 
-Further information on load-balancing is available in the link:https://help.ui.com/hc/en-us/articles/205145990-EdgeRouter-WAN-Load-Balancing[Ubiquiti EdgeRouter WAN Load-Balancing documentation].
+Further information on load-balancing is available in the link:https://help.ui.com/hc/en-us/articles/205145990-EdgeRouter-WAN-Load-Balancing[Ubiquiti(R) EdgeRouter WAN Load-Balancing documentation].
 
 === Debugging
 
