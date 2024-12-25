@@ -26,12 +26,15 @@
     <Compile Include="examples\dsl_status_samples.py" />
     <Compile Include="examples\dsl_status_socket_listener.py" />
     <Compile Include="examples\dsl_status_spoof_broadcast.py" />
+    <Compile Include="examples\edgerouter\draytek_health.py" />
+    <Compile Include="examples\edgerouter\draytek_keygen.py" />
     <Compile Include="src\draytek_tools\dsl_status\__init__.py" />
     <Compile Include="src\draytek_tools\dsl_status\cryptography.py" />
     <Compile Include="src\draytek_tools\dsl_status\message.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="examples\" />
+    <Folder Include="examples\edgerouter\" />
     <Folder Include="src\" />
     <Folder Include="src\draytek_tools\" />
     <Folder Include="src\draytek_tools\dsl_status\" />

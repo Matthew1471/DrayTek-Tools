@@ -1,0 +1,74 @@
+= Ubiquiti(R) EdgeRouter Integration Documentation
+:toc:
+Matthew1471 <https://github.com/matthew1471[@Matthew1471]>;
+
+// Document Settings:
+
+// Set the ID Prefix and ID Separators to be consistent with GitHub so links work irrespective of rendering platform. (https://docs.asciidoctor.org/asciidoc/latest/sections/id-prefix-and-separator/)
+:idprefix:
+:idseparator: -
+
+// Any code examples will be in Python by default.
+:source-language: python
+
+ifndef::env-github[:icons: font]
+
+// Set the admonitions to have icons (Github Emojis) if rendered on GitHub (https://blog.mrhaki.com/2016/06/awesome-asciidoctor-using-admonition.html).
+ifdef::env-github[]
+:status:
+:caution-caption: :fire:
+:important-caption: :exclamation:
+:note-caption: :paperclip:
+:tip-caption: :bulb:
+:warning-caption: :warning:
+endif::[]
+
+// Document Variables:
+:release-version: 1.0
+:url-org: https://github.com/Matthew1471
+:url-repo: {url-org}/DrayTek-Tools
+:url-contributors: {url-repo}/graphs/contributors
+
+== Introduction
+
+DrayTek-Tools is an unofficial project providing a collection of tools for DrayTek(R)'s products.
+
+More details on the project are available from the xref:../../../README.adoc[project's homepage].
+
+== Load Balance Route-Test Documentation
+
+The Ubiquiti(C) EdgeRouter(R) supports WAN Load-Balancing and as part of this can perform route tests to see if an interface is reachable or unreachable. If the EdgeRouter(R) determines an interface is unreachable it will automatically make route table changes to ensure traffic is routed over another interface.
+
+Typically a route-test is set to ping Internet accessible hosts or a default gateway to determine if an interface is up but this either wastes bandwidth or pings a modem that will respond despite the Internet being down.
+
+Instead this script was created, it's a modified Python 2.7.13 version of the library but made to be performant to run every 10-15 seconds.
+
+[TIP]
+====
+You will have to run `chmod +x /config/scripts/draytek_*.py` after these scripts are uploaded to make them executable.
+====
+
+=== Finding Decryption Key
+
+To be able to decrypt the DSL Status messages you first need to obtain your decryption key. Running `./draytek_keygen.py` with your MAC address (e.g. `./draytek_keygen.py aa:bb:cc:dd:ee:ff`) will give you the correct key for that modem's MAC address.
+
+=== EdgeOS Configuration
+
+To configure it the script should be edited to include the correct decryption key for your modem and copied to the `/config/scripts/` folder. Then, simply set this script to run for your load-balance group (e.g. `G`) and interface (`pppoe0`), the script itself listens for any DrayTek device and will have no concept of the interface you configure it for, however EdgeRouter will change the availability for whatever interface the script is assigned to.
+
+Then EdgeOS can be configured with commands similar to this:
+
+[source]
+----
+set load-balance group G interface pppoe0 route-test count failure 1
+set load-balance group G interface pppoe0 route-test count success 1
+set load-balance group G interface pppoe0 route-test initial-delay 5
+set load-balance group G interface pppoe0 route-test interval 15
+set load-balance group G interface pppoe0 route-test type script /config/scripts/draytek_health.py
+----
+
+This will cause the script to run every 15 seconds (after a 5 second delay) and if the DSL Status returned is negative even once will trigger the actions and will recover on a single success.
+
+=== Debugging
+
+Log messages will be written into `/var/log/messages` and can be searched for with the command `grep -i draytek_health /var/log/messages`
