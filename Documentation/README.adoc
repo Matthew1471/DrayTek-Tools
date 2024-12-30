@@ -101,8 +101,8 @@ As you can see some of the strings are now visible. The data is stored in the fo
 [options="header,autowidth"]
 |====================================================
 |Name                  |Type          |Length (bytes)
-|VDSL Upload Speed     |Signed Integer|4
-|VDSL Download Speed   |Signed Integer|4
+|DSL Upload Speed      |Signed Integer|4
+|DSL Download Speed    |Signed Integer|4
 |ADSL TX Cells         |Signed Integer|4
 |ADSL RX Cells         |Signed Integer|4
 |ADSL TX CRC Errors    |Signed Integer|4
@@ -114,15 +114,14 @@ As you can see some of the strings are now visible. The data is stored in the fo
 |ADSL Loop Attenuation |Signed Integer|4
 |ADSL SNR Margin       |Signed Integer|4
 |Modem Firmware Version|String        |20
-|VDSL Profile          |String        |18
+|Running Mode          |String        |18
 |State                 |String        |26
 |====================================================
 
 [TIP]
 ====
-Some of the meaning behind these values is best explained on the link:https://www.draytek.co.uk/support/guides/kb-vigor-diagnostics-adsl-statistics[DrayTek(R) website].
+Some of the meaning behind these values is best explained on the DrayTek(R) website pages link:https://www.draytek.co.uk/support/guides/kb-vigor-diagnostics-adsl-statistics[ADSL Statistics] and link:https://www.draytek.co.uk/support/guides/kb-dsl-status-more[How to check detailed ADSL / VDSL line statistics].
 ====
-
 
 When unpacked into a tuple our sample data is:
 
@@ -140,20 +139,20 @@ Which ultimately results in the following:
 [options="header,autowidth"]
 |====================================================================
 |Parameter             |Value
-|VDSL Upload Speed     |19978000 bps (19 Mbps)
-|VDSL Download Speed   |73821000 bps (73 Mbps)
+|DSL Upload Speed      |19978000 bps (19 Mbps)
+|DSL Download Speed    |73821000 bps (73 Mbps)
 |ADSL TX Cells         |2925
 |ADSL RX Cells         |0
 |ADSL TX CRC Errors    |1635149728
 |ADSL RX CRC Errors    |1635149728
-|xDSL Type             |6 (6 = VDSL, 1 = ADSL)
+|DSL Type              |6 (1 = ADSL, 6 = VDSL)
 |Timestamp             |0
 |VDSL SNR Upload       |3
 |VDSL SNR Download     |3
 |ADSL Loop Attenuation |1615007372
 |ADSL SNR Margin       |8640001
 |Modem Firmware Version|b'12-3-2-3-0-5'
-|VDSL Profile          |b'17A'
+|Running Mode          |b'17A'
 |State                 |b'SHOWTIME'
 |====================================================================
 
