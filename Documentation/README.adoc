@@ -97,29 +97,26 @@ After ignoring the first 4 bytes and running the AES-128 CBC decryption the decr
 
 As you can see some of the strings are now visible. The data is stored in the following 112 fixed byte structure:
 
-
 .DSL Status Message Structure
 [options="header,autowidth"]
-|======================================================
-|Name                  |Type            |Length (bytes)
-|VDSL Upload Speed     |Unsigned Integer|4
-|VDSL Download Speed   |Unsigned Integer|4
-|ADSL TX Cells         |Unsigned Integer|4
-|ADSL RX Cells         |Unsigned Integer|4
-|ADSL TX CRC Errors    |Unsigned Integer|4
-|ADSL RX CRC Errors    |Unsigned Integer|4
-|xDSL Type             |Unsigned Integer|4
-|Timestamp             |Unsigned Integer|4
-|VDSL SNR Upload       |Unsigned Integer|4
-|VDSL SNR Download     |Unsigned Integer|4
-|ADSL Loop Attenuation |Unsigned Integer|4
-|ADSL SNR Margin       |Unsigned Integer|4
-|Modem Firmware Version|String          |20
-|VDSL Profile          |String          |4
-|Padding?              |Bytes           |14
-|State                 |String          |14
-|AES Padding?          |Bytes           |12
-|======================================================
+|====================================================
+|Name                  |Type          |Length (bytes)
+|VDSL Upload Speed     |Signed Integer|4
+|VDSL Download Speed   |Signed Integer|4
+|ADSL TX Cells         |Signed Integer|4
+|ADSL RX Cells         |Signed Integer|4
+|ADSL TX CRC Errors    |Signed Integer|4
+|ADSL RX CRC Errors    |Signed Integer|4
+|xDSL Type             |Signed Integer|4
+|Timestamp             |Signed Integer|4
+|VDSL SNR Upload       |Signed Integer|4
+|VDSL SNR Download     |Signed Integer|4
+|ADSL Loop Attenuation |Signed Integer|4
+|ADSL SNR Margin       |Signed Integer|4
+|Modem Firmware Version|String        |20
+|VDSL Profile          |String        |18
+|State                 |String        |26
+|====================================================
 
 [TIP]
 ====
@@ -131,7 +128,7 @@ When unpacked into a tuple our sample data is:
 
 [source]
 ----
-(19978000, 73821000, 2925, 0, 1635149728, 1635149728, 6, 0, 3, 3, 1615007372, 8640001, b'12-3-2-3-0-5\x00\xff\xff\xff`2\xc8\x88', b'17A\x00', b'`\x94\x00\x00`\x93\xc5\xb0axg\xa0ad', b'SHOWTIME\x00\x00avg\xa0', b'\x00\x00-\xb4\x00\x00\x00\x07a\x99\x00\x00')
+(19978000, 73821000, 2925, 0, 1635149728, 1635149728, 6, 0, 3, 3, 1615007372, 8640001, b'12-3-2-3-0-5\x00\xff\xff\xff`2\xc8\x88', b'17A\x00`\x94\x00\x00`\x93\xc5\xb0axg\xa0ad', b'SHOWTIME\x00\x00avg\xa0\x00\x00-\xb4\x00\x00\x00\x07a\x99\x00\x00')
 ----
 [NOTE]
 ====
@@ -157,9 +154,7 @@ Which ultimately results in the following:
 |ADSL SNR Margin       |8640001
 |Modem Firmware Version|b'12-3-2-3-0-5'
 |VDSL Profile          |b'17A'
-|Padding?              |b'`\x94\x00\x00`\x93\xc5\xb0axg\xa0ad'
 |State                 |b'SHOWTIME'
-|AES Padding?          |b'\x00\x00-\xb4\x00\x00\x00\x07a\x99\x00\x00'
 |====================================================================
 
 [TIP]
