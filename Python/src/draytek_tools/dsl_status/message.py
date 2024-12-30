@@ -70,7 +70,7 @@ class Message:
             payload (bytes): A DSL Status message in bytes.
 
             unsafe (bool, optional):
-                Whether to allow the null byte to be replaced in strings to allow a buffer 
+                Whether to allow the null byte to be replaced in strings to allow a buffer
                 overflow. Defaults to False.
 
         Returns:
@@ -95,7 +95,7 @@ class Message:
                 Whether to truncate any excess data in the null-terminated strings.
                 Defaults to True.
             unsafe (bool, optional):
-                Whether to allow the null byte to be replaced in strings to allow a buffer 
+                Whether to allow the null byte to be replaced in strings to allow a buffer
                 overflow. Defaults to False.
 
         Raises:
@@ -137,7 +137,7 @@ class Message:
 
         Args:
             unsafe (bool, optional):
-                Whether to allow the null byte to be replaced in strings to allow a buffer 
+                Whether to allow the null byte to be replaced in strings to allow a buffer
                 overflow. Defaults to False.
 
         Returns:
