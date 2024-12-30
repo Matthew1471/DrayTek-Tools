@@ -20,6 +20,9 @@
 This example spoofs DrayTek® Vigor™ DSL Status message broadcasts.
 """
 
+# We output the date and time.
+from datetime import datetime
+
 # We use the system socket APIs to send network traffic.
 import socket
 
@@ -70,20 +73,22 @@ def send_data(mac_address):
      '4d450000617667a00022eac00000000761990000'
     ]
 
-    # Repeat until the program is exited.
-    while True:
+    # Create a UDP socket to send DSL Status messages.
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
 
-        # Create a UDP socket to send DSL Status messages.
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
+        # Permit sending of broadcast messages.
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
-            # Permit sending of broadcast messages.
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-
+        # Repeat until the program is exited.
+        while True:
             # Take each of our sample messages.
             for message in messages:
 
                 # Notify the user a DSL Status message is being sent.
-                print('Sending DSL Status message sample via UDP broadcast.')
+                print(
+                    datetime.now().strftime("%d/%m/%Y %H:%M:%S") +
+                    ' - Sending DSL Status message sample via UDP broadcast.'
+                )
 
                 # Get the actual bytes for the current message.
                 message_bytes = bytes.fromhex(message)
@@ -95,7 +100,7 @@ def send_data(mac_address):
                 )
 
                 # Send the DSL Status message to the broadcast address on UDP port 4944.
-                sock.sendto(encrypted_message, ("255.255.255.255", 4944))
+                sock.sendto(encrypted_message, ('255.255.255.255', 4944))
 
                 # Wait 10 seconds to avoid flooding the broadcast receivers.
                 sleep(10)

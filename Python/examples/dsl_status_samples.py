@@ -33,6 +33,7 @@ import hashlib
 # All the shared DrayTek® DSL Status message functions are in this package.
 from draytek_tools import dsl_status
 
+
 def show_decrypt_example():
     """
     Show an encrypted DSL Status message payload being decrypted.
@@ -101,6 +102,7 @@ def show_generated_example():
     # Make a new DSL Status message.
     message = dsl_status.Message()
     message.modem_firmware_version = 'LOL!'.encode()
+    message.dsl_type = 6
 
     # Output the generated DSL Status message to the console.
     print('DSL Status:\n')
