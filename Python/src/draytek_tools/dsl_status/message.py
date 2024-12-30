@@ -24,6 +24,7 @@ This module provides methods for representing DSL Status broadcasts.
 # We use the struct library to interpret bytes as packed binary data.
 import struct
 
+
 # pylint: disable=too-many-instance-attributes
 # This is a data class so is expected to have many instance attributes.
 class Message:
@@ -32,7 +33,12 @@ class Message:
     """
 
     # The format string for the struct pack and unpack methods.
-    FORMAT_STRING = '!IIIIIIIIIIII20s4s14s14s12s'
+    FORMAT_STRING = '!iiiiiiiiiiii19sx17sx25sx'
+
+    # An alternative format string for the struct pack and unpack methods.
+    # This version allows the null bytes in strings to be manipulated.
+    # This is useful when trying to create a buffer overflow.
+    FORMAT_STRING_UNSAFE = '!iiiiiiiiiiii20s18s26s'
 
     @staticmethod
     def _truncate_string(string_bytes):
@@ -53,7 +59,7 @@ class Message:
         return string_bytes.split(sep=b'\0', maxsplit=1)[0]
 
     @staticmethod
-    def convert_bytes_to_tuple(payload):
+    def convert_bytes_to_tuple(payload, unsafe=False):
         """
         Convert DSL Status bytes to a tuple.
 
@@ -63,14 +69,21 @@ class Message:
         Args:
             payload (bytes): A DSL Status message in bytes.
 
+            unsafe (bool, optional):
+                Whether to allow the null byte to be replaced in strings to allow a buffer 
+                overflow. Defaults to False.
+
         Returns:
             tuple: A tuple of each of the attributes.
         """
 
         # We use struct to unpack the payload data.
-        return struct.unpack(Message.FORMAT_STRING, payload)
+        return struct.unpack(
+            Message.FORMAT_STRING_UNSAFE if unsafe else Message.FORMAT_STRING,
+            payload
+        )
 
-    def __init__(self, payload=None, truncate_strings=True):
+    def __init__(self, payload=None, truncate_strings=True, unsafe=False):
         """
         Initialize a DrayTek® Vigor DSL Status message instance, optionally with existing data.
 
@@ -81,6 +94,9 @@ class Message:
             truncate_strings (bool, optional):
                 Whether to truncate any excess data in the null-terminated strings.
                 Defaults to True.
+            unsafe (bool, optional):
+                Whether to allow the null byte to be replaced in strings to allow a buffer 
+                overflow. Defaults to False.
 
         Raises:
             ValueError: If the payload type is not a supported type.
@@ -89,8 +105,8 @@ class Message:
         # Is an empty DSL Status Message instance being requested?
         if payload is None:
             # Set blank initial values.
-            self.vdsl_upload_speed = 0
-            self.vdsl_download_speed = 0
+            self.dsl_upload_speed = 0
+            self.dsl_download_speed = 0
             self.adsl_tx_cells = 0
             self.adsl_rx_cells = 0
             self.adsl_tx_crc_errors = 0
@@ -101,15 +117,13 @@ class Message:
             self.vdsl_snr_download = 0
             self.adsl_loop_att = 0
             self.adsl_snr_margin = 0
-            self.modem_firmware_version = bytearray(20)
-            self.vdsl_profile = bytearray(4)
-            self.padding = bytearray(14)
-            self.state = bytearray(14)
-            self.padding2 = bytearray(12)
+            self.modem_firmware_version = bytearray(19)
+            self.running_mode = bytearray(17)
+            self.state = bytearray(25)
         # Has the user asked to initialise this object from a byte array?
         elif isinstance(payload, bytes):
             # We use struct to unpack the payload data bytes.
-            converted_tuple = self.convert_bytes_to_tuple(payload)
+            converted_tuple = self.convert_bytes_to_tuple(payload, unsafe)
 
             # Set the attributes from the unpacked tuple.
             self.set_from_tuple(converted_tuple, truncate_strings)
@@ -117,17 +131,22 @@ class Message:
         else:
             raise ValueError(f'Initialising from a {type(payload)} is not supported.')
 
-    def convert_to_bytes(self):
+    def convert_to_bytes(self, unsafe=False):
         """
         Converts this instance to a packed series of bytes.
+
+        Args:
+            unsafe (bool, optional):
+                Whether to allow the null byte to be replaced in strings to allow a buffer 
+                overflow. Defaults to False.
 
         Returns:
             bytes: The packed bytes representing this DSL Status Message instance.
         """
         return struct.pack(
-            Message.FORMAT_STRING,
-            self.vdsl_upload_speed,
-            self.vdsl_download_speed,
+            Message.FORMAT_STRING_UNSAFE if unsafe else Message.FORMAT_STRING,
+            self.dsl_upload_speed,
+            self.dsl_download_speed,
             self.adsl_tx_cells,
             self.adsl_rx_cells,
             self.adsl_tx_crc_errors,
@@ -139,10 +158,8 @@ class Message:
             self.adsl_loop_att,
             self.adsl_snr_margin,
             self.modem_firmware_version,
-            self.vdsl_profile,
-            self.padding,
+            self.running_mode,
             self.state,
-            self.padding2
         )
 
     def set_from_tuple(self, tuple_data, truncate_arrays = True):
@@ -162,8 +179,8 @@ class Message:
 
         # Define the attributes in the order they appear in the tuple.
         attributes = [
-            'vdsl_upload_speed',
-            'vdsl_download_speed',
+            'dsl_upload_speed',
+            'dsl_download_speed',
             'adsl_tx_cells',
             'adsl_rx_cells',
             'adsl_tx_crc_errors',
@@ -175,14 +192,12 @@ class Message:
             'adsl_loop_att',
             'adsl_snr_margin',
             'modem_firmware_version',
-            'vdsl_profile',
-            'padding',
+            'running_mode',
             'state',
-            'padding2'
         ]
 
         # Some tuple fields are null-terminated strings and may need to be handled separately.
-        string_fields = {'modem_firmware_version', 'vdsl_profile', 'state'}
+        string_fields = {'modem_firmware_version', 'running_mode', 'state'}
 
         # Set the Message attributes from the tuple fields.
         for index, attribute in enumerate(attributes):
@@ -203,23 +218,21 @@ class Message:
             string: A string representing this DSL Status Message instance.
         """
         return (
-            f' VDSL Upload Speed: {self.vdsl_upload_speed} bps'
-            f' ({self.vdsl_upload_speed // 1000000} Mbps)\n'
-            f' VDSL Download Speed: {self.vdsl_download_speed} bps'
-            f' ({self.vdsl_download_speed // 1000000} Mbps)\n'
+            f' DSL Upload Speed: {self.dsl_upload_speed} bps'
+            f' ({self.dsl_upload_speed // 1000000} Mbps)\n'
+            f' DSL Download Speed: {self.dsl_download_speed} bps'
+            f' ({self.dsl_download_speed // 1000000} Mbps)\n'
             f' ADSL TX Cells: {self.adsl_tx_cells}\n'
             f' ADSL RX Cells: {self.adsl_rx_cells}\n'
             f' ADSL TX CRC Errors: {self.adsl_tx_crc_errors}\n'
             f' ADSL RX CRC Errors: {self.adsl_rx_crc_errors}\n'
-            f' xDSL Type: {self.dsl_type} (6 = VDSL, 1 = ADSL)\n'
+            f' DSL Type: {self.dsl_type} (1 = ADSL, 6 = VDSL)\n'
             f' Timestamp: {self.timestamp}\n'
             f' VDSL SNR Upload: {self.vdsl_snr_upload}\n'
             f' VDSL SNR Download: {self.vdsl_snr_download}\n'
             f' ADSL Loop Attenuation: {self.adsl_loop_att}\n'
             f' ADSL SNR Margin: {self.adsl_snr_margin}\n'
             f' Modem Firmware Version: {bytes(self.modem_firmware_version)}\n'
-            f' VDSL Profile: {bytes(self.vdsl_profile)}\n'
-            f' Padding: {bytes(self.padding)}\n'
+            f' Running Mode: {bytes(self.running_mode)}\n'
             f' State: {bytes(self.state)}\n'
-            f' Padding2: {bytes(self.padding2)}\n'
         )

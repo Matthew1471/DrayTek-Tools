@@ -19,7 +19,7 @@
 """
 A module for interacting with DrayTek® Vigor™'s DSL Status broadcast packets.
 
-This module provides functionality to interact with the DrayTek® Vigor™ DSL Status broadcast packets.
+This module provides functionality to interact with DrayTek® Vigor™'s DSL Status broadcast packets.
 """
 
 # Allow the user to use cryptography and Message by just importing draytek_tools.dsl_status.
