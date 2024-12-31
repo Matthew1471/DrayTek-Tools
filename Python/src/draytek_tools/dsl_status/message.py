@@ -21,6 +21,9 @@ DrayTek® Vigor™ DSL Status Message Module.
 This module provides methods for representing DSL Status broadcasts.
 """
 
+# Import the Enum class for creating enumerations.
+from enum import Enum
+
 # We use the struct library to interpret bytes as packed binary data.
 import struct
 
@@ -39,6 +42,17 @@ class Message:
     # This version allows the null bytes in strings to be manipulated.
     # This is useful when trying to create a buffer overflow.
     FORMAT_STRING_UNSAFE = '!iiiiiiiiiiii20s18s26s'
+
+    class DslType(Enum):
+        """
+        Enumeration for different types of Digital Subscriber Line (DSL) connections.
+
+        Attributes:
+            ADSL (int): Asymmetric Digital Subscriber Line.
+            VDSL (int): Very-high-bit-rate Digital Subscriber Line.
+        """
+        ADSL = 1
+        VDSL = 6
 
     @staticmethod
     def _truncate_string(string_bytes):
@@ -226,7 +240,7 @@ class Message:
             f' ADSL RX Cells: {self.adsl_rx_cells}\n'
             f' ADSL TX CRC Errors: {self.adsl_tx_crc_errors}\n'
             f' ADSL RX CRC Errors: {self.adsl_rx_crc_errors}\n'
-            f' DSL Type: {self.dsl_type} (1 = ADSL, 6 = VDSL)\n'
+            f' DSL Type: {Message.DslType(self.dsl_type).name}\n'
             f' Timestamp: {self.timestamp}\n'
             f' VDSL SNR Upload: {self.vdsl_snr_upload}\n'
             f' VDSL SNR Download: {self.vdsl_snr_download}\n'

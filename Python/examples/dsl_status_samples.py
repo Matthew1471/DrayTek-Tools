@@ -102,7 +102,7 @@ def show_generated_example():
     # Make a new DSL Status message.
     message = dsl_status.Message()
     message.modem_firmware_version = 'LOL!'.encode()
-    message.dsl_type = 6
+    message.dsl_type = dsl_status.Message.DslType.VDSL.value
 
     # Output the generated DSL Status message to the console.
     print('DSL Status:\n')

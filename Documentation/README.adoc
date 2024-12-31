@@ -145,7 +145,7 @@ Which ultimately results in the following:
 |ADSL RX Cells         |0
 |ADSL TX CRC Errors    |1635149728
 |ADSL RX CRC Errors    |1635149728
-|DSL Type              |6 (1 = ADSL, 6 = VDSL)
+|DSL Type              |VDSL (1 = ADSL, 6 = VDSL)
 |Timestamp             |0
 |VDSL SNR Upload       |3
 |VDSL SNR Download     |3
