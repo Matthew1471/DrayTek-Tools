@@ -249,7 +249,8 @@ void receive_data(char *mac_address_string) {
 
                 // Notify user a message has been received.
                 printf(
-                        "Received UDP Datagram of correct size; using MAC Address %s to decrypt contents:\n",
+                        "Received UDP Datagram from %s of correct size; using MAC Address %s to decrypt contents:\n",
+                        inet_ntoa(client_address.sin_addr),
                         ether_ntoa(&mac_address)
                 );
 
