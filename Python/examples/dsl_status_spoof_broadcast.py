@@ -109,7 +109,7 @@ if __name__ == '__main__':
     # Check whether the user has supplied a source MAC address.
     if len(sys.argv) != 2:
         print('Usage:')
-        print(f'{sys.argv[0]} <Network Card\'s MAC Address>')
+        print(f' {sys.argv[0]} <Network Card\'s MAC Address>\n')
         print(f'e.g. {sys.argv[0]} aa:bb:cc:dd:ee:ff')
         sys.exit(1)
 
