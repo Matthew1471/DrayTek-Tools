@@ -107,7 +107,7 @@ As you can see some of the strings are now visible. The data is stored in the fo
 |ADSL RX Cells         |Signed Integer|4
 |ADSL TX CRC Errors    |Signed Integer|4
 |ADSL RX CRC Errors    |Signed Integer|4
-|xDSL Type             |Signed Integer|4
+|DSL Type              |Signed Integer|4
 |Timestamp             |Signed Integer|4
 |VDSL SNR Upload       |Signed Integer|4
 |VDSL SNR Download     |Signed Integer|4
