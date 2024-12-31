@@ -127,7 +127,7 @@ When unpacked into a tuple our sample data is:
 
 [source]
 ----
-(19978000, 73821000, 2925, 0, 1635149728, 1635149728, 6, 0, 3, 3, 1615007372, 8640001, b'12-3-2-3-0-5\x00\xff\xff\xff`2\xc8\x88', b'17A\x00`\x94\x00\x00`\x93\xc5\xb0axg\xa0ad', b'SHOWTIME\x00\x00avg\xa0\x00\x00-\xb4\x00\x00\x00\x07a\x99\x00\x00')
+(19978000, 73821000, 2925, 0, 1635149728, 1635149728, 6, 0, 3, 3, 1615007372, 8640001, b'12-3-2-3-0-5\x00\xff\xff\xff`2\xc8', b'17A\x00`\x94\x00\x00`\x93\xc5\xb0axg\xa0a', b'SHOWTIME\x00\x00avg\xa0\x00\x00-\xb4\x00\x00\x00\x07a\x99\x00')
 ----
 [NOTE]
 ====
