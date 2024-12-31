@@ -49,6 +49,9 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # Set a timeout of 11 seconds (the modem should broadcast every 10 seconds).
 sock.settimeout(11)
 
+# Permit multiple receiver threads listening.
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
 # Bind to all interfaces on port 4944.
 sock.bind(('0.0.0.0', 4944))
 
@@ -91,6 +94,11 @@ try:
 
             # Return a DSL Status success out of caution.
             sys.exit(0)
+
+        # Check the DSL type is valid.
+        if stdout[27] not in [b'\x01', b'\x06']:
+            # Wait for another message as this is not a valid DSL Status message.
+            continue
 
         # Only obtain the status (this script needs to be performant)
         # PyLint: Not a constant; false positive.

@@ -46,11 +46,17 @@ def receive_data(mac_address):
 
     # Create a UDP socket to listen for DSL Status messages.
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        # Permit multiple receiver threads listening.
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
         # Bind to all interfaces on port 4944.
         sock.bind(('0.0.0.0', 4944))
 
         # Maximum number of bytes to receive.
         max_receive_bytes = 116
+
+        # Obtain a list of valid DSL type values.
+        dsl_type_values = [dsl_type.value for dsl_type in dsl_status.Message.DslType]
 
         # Keep listening for messages until the program is exited.
         while True:
@@ -65,7 +71,7 @@ def receive_data(mac_address):
 
             # Notify the user a message has been received.
             print(f'Received UDP Datagram from {ip_address[0]} of correct size;'
-                    f' using MAC address {mac_address} to decrypt contents:\n')
+                    f' using MAC address {mac_address} to decrypt contents:')
 
             # Perform the decryption.
             decrypted_payload = dsl_status.cryptography.decrypt_bytes(
@@ -74,17 +80,25 @@ def receive_data(mac_address):
             )
 
             # Debugging.
-            # print('Raw (Bytes):\n\n ' + str(decrypted_payload) + '\n')
+            # print('\nRaw (Bytes):\n\n ' + str(decrypted_payload) + '\n')
             # print(' ->\n')
             # unpacked_payload = dsl_status.Message.convert_bytes_to_tuple(decrypted_payload)
             # print('Unpacked (Tuple):\n\n ' + str(unpacked_payload) + '\n')
             # print(' ->\n')
 
+            # Check the DSL type is valid.
+            if decrypted_payload[27] not in dsl_type_values:
+                # Notify the user the decrypted payload failed validation.
+                print(' * Message failed DSL Type validation, check decryption key.\n')
+
+                # Wait for another message as this is not a valid DSL Status message.
+                continue
+
             # Parse the DSL Status message.
             message = dsl_status.Message(decrypted_payload)
 
             # Output to console.
-            print(message)
+            print('\n' + str(message))
 
 if __name__ == '__main__':
 
