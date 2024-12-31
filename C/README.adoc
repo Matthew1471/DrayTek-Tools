@@ -1,0 +1,48 @@
+= C Code
+:toc:
+Matthew1471 <https://github.com/matthew1471[@Matthew1471]>;
+
+// Document Settings:
+
+// Set the ID Prefix and ID Separators to be consistent with GitHub so links work irrespective of rendering platform. (https://docs.asciidoctor.org/asciidoc/latest/sections/id-prefix-and-separator/)
+:idprefix:
+:idseparator: -
+
+// Any code examples will be in C by default.
+:source-language: C
+
+ifndef::env-github[:icons: font]
+
+// Set the admonitions to have icons (Github Emojis) if rendered on GitHub (https://blog.mrhaki.com/2016/06/awesome-asciidoctor-using-admonition.html).
+ifdef::env-github[]
+:status:
+:caution-caption: :fire:
+:important-caption: :exclamation:
+:note-caption: :paperclip:
+:tip-caption: :bulb:
+:warning-caption: :warning:
+endif::[]
+
+// Document Variables:
+:release-version: 1.0
+:url-org: https://github.com/Matthew1471
+:url-repo: {url-org}/DrayTek-Tools
+:url-contributors: {url-repo}/graphs/contributors
+
+== Introduction
+
+DrayTek-Tools is an unofficial project providing a collection of tools for DrayTek(R)'s products.
+
+More details on the project are available from the xref:../README.adoc[project's homepage].
+
+== C Source Code
+
+This is a modified and adapted version from https://gist.github.com/sgarwood/c60883ad2921893d1e9def4bd22b0728
+
+This can be compiled on Linux with the following command:
+
+`g++ -Ilib/tiny-AES-c lib/tinyAES-c/aes.c main.c -lcrypto`
+
+and with `./a.out` to run (you may have to `chmod +x a.out`)
+
+The Python version is more complete and cross-platform.
