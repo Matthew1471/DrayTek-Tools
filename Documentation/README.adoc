@@ -99,7 +99,7 @@ As you can see some of the strings are now visible. The data is stored in the fo
 
 .DSL Status Message Structure
 [options="header,autowidth"]
-|====================================================
+|================================================================
 |Name                  |Type          |Length (bytes)
 |DSL Upload Speed      |Signed Integer|4
 |DSL Download Speed    |Signed Integer|4
@@ -113,10 +113,10 @@ As you can see some of the strings are now visible. The data is stored in the fo
 |VDSL SNR Download     |Signed Integer|4
 |ADSL Loop Attenuation |Signed Integer|4
 |ADSL SNR Margin       |Signed Integer|4
-|Modem Firmware Version|String        |20
-|Running Mode          |String        |18
-|State                 |String        |26
-|====================================================
+|Modem Firmware Version|String        |20 (19 data + 1 null byte)
+|Running Mode          |String        |18 (17 data + 1 null byte)
+|State                 |String        |26 (25 data + 1 null byte)
+|================================================================
 
 [TIP]
 ====
