@@ -95,7 +95,7 @@ try:
         # Only obtain the status (this script needs to be performant)
         # PyLint: Not a constant; false positive.
         # pylint: disable=invalid-name
-        decrypted_status = str(stdout[86:-14].split(b'\0', 1)[0])
+        decrypted_status = str(stdout[86:].split(b'\0', 1)[0])
 
         # Check the DSL status.
         if decrypted_status == 'SHOWTIME':
