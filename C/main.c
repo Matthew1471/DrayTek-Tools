@@ -1,37 +1,40 @@
-/* 
+/*
  * This file is part of DrayTek-Tools <https://github.com/Matthew1471/DrayTek-Tools>
  * Copyright (c) 2024 Matthew1471!
- * 
- * This program is free software: you can redistribute it and/or modify  
- * it under the terms of the GNU General Public License as published by  
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, version 3.
  *
- * This program is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License 
+ * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 // Adapted from https://gist.github.com/sgarwood/c60883ad2921893d1e9def4bd22b0728
 
-#include <assert.h>        // For the assert functionality.
-#include <arpa/inet.h>     // For inet_* functions.
-#include <errno.h>         // For standard error numbers.
-#include <netinet/ether.h> // For ether_* functions.
-#include <openssl/sha.h>   // "apt-get install libssl-dev" if missing.
-#include <stdio.h>         // For printf() and fprintf().
-#include <string.h>        // For memset().
-#include <stdlib.h>        // For exit().
-#include <unistd.h>        // For close() function.
+#include <arpa/inet.h>     // inet_* functions.
+#include <assert.h>        // assert() function.
+#include <errno.h>         // Standard error number types.
+#include <netinet/ether.h> // ether_* functions.
+#include <openssl/sha.h>   // SHA1() function ("apt-get install libssl-dev" if missing).
+#include <signal.h>        // signal() function.
+#include <stdio.h>         // printf() and fprintf() functions.
+#include <stdlib.h>        // exit() function.
+#include <string.h>        // memset() function.
+#include <unistd.h>        // close() function.
 
-#include "lib/tiny-AES-c/aes.h" // For the AES decryption.
+#include "lib/tiny-AES-c/aes.h" // AES decryption functions.
 
 #define DEBUG 0               // Whether to print debugging information.
-#define TRUE 1                // Define TRUE.
-#define MAX_BYTES_LENGTH 116  // Longest string to receive.
+#define DSL_STATUS_LENGTH 116 // The length of a DSL Status message in bytes.
+
+// Used to signal when the program should exit.
+volatile sig_atomic_t ShouldStop = 0;
 
 // Define the DslType enumeration.
 enum DslType {
@@ -60,21 +63,9 @@ struct DslStatus {
     // 116 Total Bytes
 };
 
-// Function to convert enum DslType to string.
-const char* dsl_type_to_string(enum DslType dsl_type) {
-    switch (dsl_type) {
-        case ADSL:
-            return "ADSL";
-        case VDSL:
-            return "VDSL";
-        default:
-            return "Unknown";
-    }
-}
-
 // Function to optionally output the MAC address and decryption key.
 void print_debug_info(const struct ether_addr *mac_address, const uint8_t *key, size_t key_length) {
-    printf("MAC Address: %02X%02X%02X%02X%02X%02X\n",
+    printf("\nMAC Address: %02X%02X%02X%02X%02X%02X\n",
        mac_address->ether_addr_octet[0],
        mac_address->ether_addr_octet[1],
        mac_address->ether_addr_octet[2],
@@ -86,10 +77,9 @@ void print_debug_info(const struct ether_addr *mac_address, const uint8_t *key, 
     for (int count = 0; count < key_length; count++) {
         printf(" Key #%d = %c = %02X\n", count, key[count], key[count]);
     }
-    printf("\n");
 }
 
-void print_dsl_status(DslType dsl_type, const struct DslStatus* dsl_status_data) {
+void print_dsl_status(enum DslType dsl_type, const struct DslStatus* dsl_status_data) {
     printf("\n");
     if (DEBUG) {
         printf(" DSL Status Protocol Identifier: 0x%02X, 0x%02X, 0x%02X, 0x%02X\n",
@@ -111,7 +101,19 @@ void print_dsl_status(DslType dsl_type, const struct DslStatus* dsl_status_data)
         printf(" ADSL RX CRC Errors: %d\n", (int32_t)ntohl(dsl_status_data->adsl_rx_crc_errors));
     }
 
-    printf(" DSL Type: %s\n", dsl_type_to_string(dsl_type));
+    printf(" DSL Type: ");
+        switch (dsl_type) {
+        case ADSL:
+            printf("ADSL");
+            break;
+        case VDSL:
+            printf("VDSL");
+            break;
+        default:
+            printf("Unknown");
+    }
+    printf("\n");
+
     printf(" Timestamp: %d\n", (int32_t)ntohl(dsl_status_data->timestamp));
 
     if (DEBUG || dsl_type == VDSL) {
@@ -126,7 +128,7 @@ void print_dsl_status(DslType dsl_type, const struct DslStatus* dsl_status_data)
 
     printf(" Modem Firmware Version: %.*s\n", 20, dsl_status_data->modem_firmware_version);
     printf(" Running Mode: %.*s\n", 18, dsl_status_data->running_mode);
-    printf(" State: %.*s\n\n", 26, dsl_status_data->state);    
+    printf(" State: %.*s\n\n", 26, dsl_status_data->state);
 }
 
 // Decrypts DSL Status broadcast bytes into the DslStatus structure.
@@ -166,16 +168,22 @@ int decrypt_dsl_status(
     }
 
     // Copy the encrypted_buffer to the dsl_status prior to decryption.
-    memcpy(dsl_status, encrypted_buffer, 116);
+    memcpy(dsl_status, encrypted_buffer, DSL_STATUS_LENGTH);
 
     // Initialise the AES decrypter (the iv/key has to be 16 bytes for AES128).
     struct AES_ctx aesCtx;
     AES_init_ctx_iv(&aesCtx, key, key);
 
     // Decrypt the payload (skipping the first 4 signature bytes).
-    AES_CBC_decrypt_buffer(&aesCtx, ((uint8_t *) dsl_status) + sizeof(signature_bytes), 112);
+    AES_CBC_decrypt_buffer(&aesCtx, ((uint8_t *) dsl_status) + sizeof(signature_bytes), DSL_STATUS_LENGTH - sizeof(signature_bytes));
 
-    return TRUE;
+    // Return success.
+    return 0;
+}
+
+void handle_sigint(int sig) {
+    // Set the flag to stop the loop.
+    ShouldStop = 1;
 }
 
 void receive_data(char *mac_address_string) {
@@ -194,7 +202,7 @@ void receive_data(char *mac_address_string) {
     }
 
     // Permit multiple receiver threads listening.
-    int opt = TRUE;
+    int opt = 1;
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
         fprintf(stderr, "setsockopt() failed: %s\n", strerror(errno));
         close(sock);
@@ -215,14 +223,17 @@ void receive_data(char *mac_address_string) {
         exit(EXIT_FAILURE);
     }
 
+    // Register the signal handler
+    signal(SIGINT, handle_sigint);
+
     // Now listening for messages until the program is exited.
-    while (TRUE) {
+    while (!ShouldStop) {
         fd_set socket_fd_set;
         FD_ZERO(&socket_fd_set);
         FD_SET(sock, &socket_fd_set);
 
         // Buffer for received string.
-        unsigned char received_data[MAX_BYTES_LENGTH + 1];
+        unsigned char received_data[DSL_STATUS_LENGTH + 1];
 
         // Is a socket ready for reading?
         if (select(sock + 1, &socket_fd_set, NULL, NULL, 0) > 0) {
@@ -235,14 +246,14 @@ void receive_data(char *mac_address_string) {
                 size_t received_data_length = recvfrom(
                         sock,
                         received_data,
-                        MAX_BYTES_LENGTH,
+                        DSL_STATUS_LENGTH,
                         0,
                         (struct sockaddr *) &client_address,
                         &address_length
                 );
 
                 // Check to see if this would be the right length for a DSL Status message.
-                if (received_data_length != 116) {
+                if (received_data_length != DSL_STATUS_LENGTH) {
                     // Wait for another message as this is not a DSL Status message.
                     continue;
                 }
@@ -256,25 +267,28 @@ void receive_data(char *mac_address_string) {
 
                 // Perform the decryption.
                 struct DslStatus dsl_status_data;
-                if (decrypt_dsl_status(&mac_address, received_data, &dsl_status_data)) {
+                if (decrypt_dsl_status(&mac_address, received_data, &dsl_status_data) == 0) {
 
                     // printf("Size of DSL Status Data: %lu\n", sizeof(dsl_status_data));
-                    assert(sizeof(dsl_status_data) == 116);
-                    
+                    assert(sizeof(dsl_status_data) == DSL_STATUS_LENGTH);
+
                     // Convert the dsl_type byte to a DslType enum.
-                    DslType dsl_type = (DslType)ntohl(dsl_status_data.dsl_type);
-                    
+                    enum DslType dsl_type = (enum DslType)ntohl(dsl_status_data.dsl_type);
+
                     // Check the DSL type is valid.
                     if (dsl_type != ADSL && dsl_type != VDSL) {
                         // Notify the user the decrypted payload failed validation.
                         printf(" * Message failed DSL Type validation, check decryption key.\n\n");
-                        
+
                         // Wait for another message as this is not a valid DSL Status message.
                         continue;
                     }
 
                     // Output to console.
                     print_dsl_status(dsl_type, &dsl_status_data);
+                } else {
+                    // Notify the user of decryption failure.
+                    printf(" * Message failed to decrypt, check decryption key.\n\n");
                 }
             }
         }
@@ -295,4 +309,7 @@ int main(int argc, char *argv[]) {
 
     // Start listening for data.
     receive_data(argv[1]);
+
+    // Notify the user that the program has completed successfully.
+    printf("\nThe program completed successfully.\n");
 }
