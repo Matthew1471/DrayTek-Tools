@@ -25,7 +25,7 @@
 #include <stdio.h>         // For printf() and fprintf().
 #include <string.h>        // For memset().
 #include <stdlib.h>        // For exit().
-#include <unistd.h>        // For close() function
+#include <unistd.h>        // For close() function.
 
 #include "lib/tiny-AES-c/aes.h" // For the AES decryption.
 
@@ -179,6 +179,13 @@ int decrypt_dsl_status(
 }
 
 void receive_data(char *mac_address_string) {
+    // Get the MAC address string in bytes.
+    struct ether_addr mac_address;
+    if (ether_aton_r(mac_address_string, &mac_address) == NULL) {
+        fprintf(stderr, "Error: Invalid MAC address format.\n");
+        exit(EXIT_FAILURE);
+    }
+
     // Create an IPv4 datagram socket using UDP.
     int sock;
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
@@ -205,13 +212,6 @@ void receive_data(char *mac_address_string) {
     if (bind(sock, (struct sockaddr *) &broadcast_address, sizeof(broadcast_address)) < 0) {
         fprintf(stderr, "bind() failed: %s\n", strerror(errno));
         close(sock);
-        exit(EXIT_FAILURE);
-    }
-
-    // Get the MAC address string in bytes.
-    struct ether_addr mac_address;
-    if (ether_aton_r(mac_address_string, &mac_address) == NULL) {
-        fprintf(stderr, "Error: Invalid MAC address format.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -279,6 +279,9 @@ void receive_data(char *mac_address_string) {
             }
         }
     }
+
+    // Ensure the socket is closed properly.
+    close(sock);
 }
 
 int main(int argc, char *argv[]) {
