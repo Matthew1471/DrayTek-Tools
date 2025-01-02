@@ -17,15 +17,20 @@
 
 // Adapted from https://gist.github.com/sgarwood/c60883ad2921893d1e9def4bd22b0728
 
-#include <arpa/inet.h>     // inet_* functions.
+#include <arpa/inet.h>     // inet_* functions (includes netinet/in.h).
 #include <assert.h>        // assert() function.
 #include <errno.h>         // Standard error number types.
-#include <netinet/ether.h> // ether_* functions.
+#include <net/ethernet.h>  // Ethernet definitions and structures.
+#include <netinet/ether.h> // ether_* functions (includes net/ethernet.h).
+#include <netinet/in.h>    // sockaddr_in type (includes sys/socket.h).
 #include <openssl/sha.h>   // SHA1() function ("apt-get install libssl-dev" if missing).
-#include <signal.h>        // signal() function.
+#include <signal.h>        // signal() function (includes unistd.h).
 #include <stdio.h>         // printf() and fprintf() functions.
 #include <stdlib.h>        // exit() function.
-#include <string.h>        // memset() function.
+#include <string.h>        // memset() and strerror() functions.
+#include <sys/select.h>    // select() function.
+#include <sys/socket.h>    // socket() function.
+#include <sys/types.h>     // System call data types.
 #include <unistd.h>        // close() function.
 
 #include "lib/tiny-AES-c/aes.h" // AES decryption functions.
@@ -51,7 +56,7 @@ struct DslStatus {
     int32_t adsl_rx_cells;                // 16
     int32_t adsl_tx_crc_errors;           // 20
     int32_t adsl_rx_crc_errors;           // 24
-    DslType dsl_type;                     // 28
+    enum DslType dsl_type;                // 28
     int32_t timestamp;                    // 32
     int32_t vdsl_snr_upload;              // 36
     int32_t vdsl_snr_download;            // 40
@@ -64,7 +69,7 @@ struct DslStatus {
 };
 
 // Function to optionally output the MAC address and decryption key.
-void print_debug_info(const struct ether_addr *mac_address, const uint8_t *key, size_t key_length) {
+void print_debug_info(const struct ether_addr *mac_address, const uint8_t *key, uint8_t key_length) {
     printf("\nMAC Address: %02X%02X%02X%02X%02X%02X\n",
        mac_address->ether_addr_octet[0],
        mac_address->ether_addr_octet[1],
@@ -74,7 +79,7 @@ void print_debug_info(const struct ether_addr *mac_address, const uint8_t *key, 
        mac_address->ether_addr_octet[5]);
 
     printf("Key/IV: %s\n", key);
-    for (int count = 0; count < key_length; count++) {
+    for (uint8_t count = 0; count < key_length; count++) {
         printf(" Key #%d = %c = %02X\n", count, key[count], key[count]);
     }
 }
@@ -155,7 +160,7 @@ int decrypt_dsl_status(
 
     // Get the uppercase hexadecimal characters of the digest (10 characters).
     int current_digest_byte = 0;
-    for (int current_key_position = 0; current_key_position < 10; current_key_position += 2) {
+    for (uint8_t current_key_position = 0; current_key_position < 10; current_key_position += 2) {
         // Fill 2 positions of the key with the 2 hex characters from a single digest byte.
         // We will do this for only 10 bytes in the key, the 6 remaining bytes remain null.
         sprintf((char *) &key[current_key_position], "%02X", message_digest[current_digest_byte]);
@@ -182,6 +187,9 @@ int decrypt_dsl_status(
 }
 
 void handle_sigint(int sig) {
+    // This line does nothing but prevents the unused parameter warning.
+    (void)sig;
+
     // Set the flag to stop the loop.
     ShouldStop = 1;
 }
@@ -223,7 +231,7 @@ void receive_data(char *mac_address_string) {
         exit(EXIT_FAILURE);
     }
 
-    // Register the signal handler
+    // Register the signal handler.
     signal(SIGINT, handle_sigint);
 
     // Now listening for messages until the program is exited.
@@ -243,7 +251,7 @@ void receive_data(char *mac_address_string) {
                 socklen_t address_length = sizeof(client_address);
 
                 // Attempt to receive a broadcast packet.
-                size_t received_data_length = recvfrom(
+                uint8_t received_data_length = recvfrom(
                         sock,
                         received_data,
                         DSL_STATUS_LENGTH,

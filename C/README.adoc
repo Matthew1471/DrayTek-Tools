@@ -41,8 +41,8 @@ This is a modified and adapted version from https://gist.github.com/sgarwood/c60
 
 This can be compiled on Linux with the following command:
 
-`g++ -Ilib/tiny-AES-c lib/tinyAES-c/aes.c main.c -lcrypto`
+`gcc -Ilib/tiny-AES-c -Wall -Wextra -pedantic -Werror -s -o dsl_status lib/tiny-AES-c/aes.c main.c -lcrypto`
 
-and with `./a.out` to run (you may have to `chmod +x a.out`)
+and with `./dsl_status` to run (you may have to `chmod +x dsl_status`)
 
 The Python version is more complete and cross-platform.
